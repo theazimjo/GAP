@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../core/constants/constants.dart';
 import '../core/network/api_client.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:background_sms/background_sms.dart';
 
 class AuthProvider with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
@@ -93,20 +92,16 @@ class AuthProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final otpCode = response.data['otpCode'];
         
-        // Background SMS using background_sms package
-        final String message = 'Sizning GAP tasdiqlash kodingiz: $otpCode';
-        
-        // Note: permissions should be handled, for simplicity using background_sms direct send
-        // In a real app, you'd check permission_handler first.
-        SmsStatus status = await BackgroundSms.sendMessage(
-          phoneNumber: phone,
-          message: message,
-        );
-
-        if (status == SmsStatus.sent) {
+        // Send SMS via Platform Channel (native Android SmsManager)
+        const platform = MethodChannel('com.gap.app/sms');
+        try {
+          await platform.invokeMethod('sendSms', {
+            'phone': phone,
+            'message': 'Sizning GAP tasdiqlash kodingiz: $otpCode',
+          });
           print('SMS sent successfully');
-        } else {
-          print('SMS failed to send: $status');
+        } on PlatformException catch (e) {
+          print('SMS send failed: ${e.message}');
         }
         
         _isLoading = false;
