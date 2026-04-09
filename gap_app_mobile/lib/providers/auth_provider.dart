@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../core/constants/constants.dart';
 import '../core/network/api_client.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:background_sms/background_sms.dart';
 
 class AuthProvider with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
@@ -92,17 +93,20 @@ class AuthProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final otpCode = response.data['otpCode'];
         
-        // Simulation: Send SMS to self
-        final Uri smsUri = Uri(
-          scheme: 'sms',
-          path: phone,
-          queryParameters: <String, String>{
-            'body': 'Sizning GAP tasdiqlash kodingiz: $otpCode',
-          },
-        );
+        // Background SMS using background_sms package
+        final String message = 'Sizning GAP tasdiqlash kodingiz: $otpCode';
         
-        if (await canLaunchUrl(smsUri)) {
-          await launchUrl(smsUri);
+        // Note: permissions should be handled, for simplicity using background_sms direct send
+        // In a real app, you'd check permission_handler first.
+        SmsStatus status = await BackgroundSms.sendMessage(
+          phoneNumber: phone,
+          message: message,
+        );
+
+        if (status == SmsStatus.sent) {
+          print('SMS sent successfully');
+        } else {
+          print('SMS failed to send: $status');
         }
         
         _isLoading = false;

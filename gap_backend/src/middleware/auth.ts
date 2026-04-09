@@ -14,6 +14,10 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
 
   const token = authHeader.split(' ')[1];
 
+  if (!token) {
+    return res.status(401).json({ message: 'Token missing' });
+  }
+
   try {
     const decoded = verifyToken(token) as { userId: number };
     req.userId = decoded.userId;

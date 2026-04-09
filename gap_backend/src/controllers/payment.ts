@@ -75,10 +75,11 @@ export const getTurnPayments = async (req: AuthRequest, res: Response) => {
     const { turnId } = req.params;
     const userId = req.userId;
 
+    if (!turnId) return res.status(400).json({ message: 'Turn ID is required' });
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     const payments = await prisma.payment.findMany({
-      where: { turnId: parseInt(turnId) },
+      where: { turnId: parseInt(turnId as string) },
       include: {
         membership: {
           include: { user: { select: { id: true, name: true, phone: true } } }

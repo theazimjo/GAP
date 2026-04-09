@@ -60,10 +60,11 @@ export const getTurns = async (req: AuthRequest, res: Response) => {
     const { groupId } = req.params;
     const userId = req.userId;
 
+    if (!groupId) return res.status(400).json({ message: 'Group ID is required' });
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     const turns = await prisma.turn.findMany({
-      where: { groupId: parseInt(groupId) },
+      where: { groupId: parseInt(groupId as string) },
       include: {
         host: { select: { id: true, name: true, phone: true } },
       },
