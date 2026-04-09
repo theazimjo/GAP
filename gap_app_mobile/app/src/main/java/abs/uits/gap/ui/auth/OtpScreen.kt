@@ -41,10 +41,10 @@ fun OtpScreen(
             try {
                 val smsManager = SmsManager.getDefault()
                 val finalCode = otpCode 
-                smsManager.sendTextMessage(phone, null, "Sizning GAP tasdiqlash kodingiz: \$finalCode", null, null)
+                smsManager.sendTextMessage(phone, null, "Sizning GAP tasdiqlash kodingiz: $finalCode", null, null)
                 Toast.makeText(context, "SMS muvaffaqiyatli jo'natildi!", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                Toast.makeText(context, "Xatolik: \${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Xatolik: ${e.message}", Toast.LENGTH_LONG).show()
             }
         } else {
             Toast.makeText(context, "SMS ruxsati berilmadi", Toast.LENGTH_LONG).show()
@@ -95,7 +95,7 @@ fun OtpScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "\$phone raqamiga (yoki orqa fonda o'zingizga) tasdiqlash kodi yuborildi.",
+                "$phone raqamiga (yoki orqa fonda o'zingizga) tasdiqlash kodi yuborildi.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
