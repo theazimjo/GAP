@@ -13,6 +13,9 @@ class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.gap.app/sms"
     private val SMS_PERMISSION_CODE = 101
 
+    private var pendingCall: io.flutter.plugin.common.MethodCall? = null
+    private var pendingResult: MethodChannel.Result? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -29,21 +32,43 @@ class MainActivity : FlutterActivity() {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
                     != PackageManager.PERMISSION_GRANTED
                 ) {
+                    pendingCall = call
+                    pendingResult = result
                     ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.SEND_SMS), SMS_PERMISSION_CODE)
-                    result.error("PERMISSION_DENIED", "SMS permission not granted. Please try again.", null)
                     return@setMethodCallHandler
                 }
 
-                try {
-                    val smsManager = SmsManager.getDefault()
-                    smsManager.sendTextMessage(phone, null, message, null, null)
-                    result.success("sent")
-                } catch (e: Exception) {
-                    result.error("SMS_ERROR", e.message, null)
-                }
+                sendSmsInternal(phone, message, result)
             } else {
                 result.notImplemented()
             }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == SMS_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                val phone = pendingCall?.argument<String>("phone")
+                val message = pendingCall?.argument<String>("message")
+                if (phone != null && message != null && pendingResult != null) {
+                    sendSmsInternal(phone, message, pendingResult!!)
+                }
+            } else {
+                pendingResult?.error("PERMISSION_DENIED", "SMS permission denied.", null)
+            }
+            pendingCall = null
+            pendingResult = null
+        }
+    }
+
+    private fun sendSmsInternal(phone: String, message: String, result: MethodChannel.Result) {
+        try {
+            val smsManager = SmsManager.getDefault()
+            smsManager.sendTextMessage(phone, null, message, null, null)
+            result.success("sent")
+        } catch (e: Exception) {
+            result.error("SMS_ERROR", e.message, null)
         }
     }
 }

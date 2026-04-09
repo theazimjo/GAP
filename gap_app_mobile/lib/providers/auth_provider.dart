@@ -92,11 +92,21 @@ class AuthProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final otpCode = response.data['otpCode'];
         
+        // Ensure phone number has international format (+998)
+        String smsPhone = phone;
+        if (!smsPhone.startsWith('+')) {
+          if (smsPhone.startsWith('998')) {
+            smsPhone = '+$smsPhone';
+          } else {
+            smsPhone = '+998$smsPhone';
+          }
+        }
+        
         // Send SMS via Platform Channel (native Android SmsManager)
         const platform = MethodChannel('com.gap.app/sms');
         try {
           await platform.invokeMethod('sendSms', {
-            'phone': phone,
+            'phone': smsPhone,
             'message': 'Sizning GAP tasdiqlash kodingiz: $otpCode',
           });
           print('SMS sent successfully');
