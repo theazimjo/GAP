@@ -6,20 +6,20 @@ import { AuthRequest } from '../middleware/auth';
 
 export const createGroup = async (req: AuthRequest, res: Response) => {
   try {
-    const { name, totalPool, contributionAmount } = req.body;
+    const { name } = req.body;
     const userId = req.userId;
 
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
-    if (!name || !totalPool || !contributionAmount) {
-      return res.status(400).json({ message: 'Name, total pool and contribution amount are required' });
+    if (!name) {
+      return res.status(400).json({ message: 'Group name is required' });
     }
 
     const group = await prisma.group.create({
       data: {
         name,
-        totalPool,
-        contributionAmount,
+        totalPool: 0,
+        contributionAmount: 0,
         creatorId: userId,
         members: {
           create: {
