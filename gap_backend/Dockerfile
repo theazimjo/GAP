@@ -1,9 +1,12 @@
 # ============================
 # Stage 1: Builder
 # ============================
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
+
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl
 
 # Copy package files
 COPY package*.json ./
@@ -26,9 +29,12 @@ RUN npm run build
 # ============================
 # Stage 2: Production Runner
 # ============================
-FROM node:20-alpine AS runner
+FROM node:20-bookworm-slim AS runner
 
 WORKDIR /app
+
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl
 
 # Only copy necessary files from Builder
 COPY --from=builder /app/package*.json ./
