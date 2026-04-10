@@ -31,7 +31,8 @@ import kotlinx.coroutines.launch
 fun GroupListScreen(
     authViewModel: AuthViewModel,
     groupViewModel: GroupViewModel,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onNavigateToDetail: (Int) -> Unit
 ) {
     val listState by groupViewModel.listState.collectAsState()
     val createState by groupViewModel.createState.collectAsState()
@@ -115,7 +116,10 @@ fun GroupListScreen(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(state.groups) { group ->
-                                GroupCard(group)
+                                GroupCard(
+                                    group = group,
+                                    onClick = { onNavigateToDetail(group.id) }
+                                )
                             }
                         }
                     }
@@ -135,9 +139,11 @@ fun GroupListScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GroupCard(group: GroupDto) {
+fun GroupCard(group: GroupDto, onClick: () -> Unit) {
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth().shadow(4.dp, RoundedCornerShape(16.dp)),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         shape = RoundedCornerShape(16.dp)

@@ -75,7 +75,22 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("login") {
                                         popUpTo("groupList") { inclusive = true }
                                     }
+                                },
+                                onNavigateToDetail = { groupId ->
+                                    navController.navigate("groupDetail/$groupId")
                                 }
+                            )
+                        }
+                        composable("groupDetail/{groupId}") { backStackEntry ->
+                            val groupIdStr = backStackEntry.arguments?.getString("groupId") ?: "0"
+                            val groupId = groupIdStr.toIntOrNull() ?: 0
+                            
+                            val detailFactory = remember(groupId) { abs.uits.gap.ui.group.GroupDetailViewModelFactory(app.groupRepository, groupId) }
+                            val detailViewModel: abs.uits.gap.ui.group.GroupDetailViewModel = viewModel(key = "groupDetail_$groupId", factory = detailFactory)
+
+                            abs.uits.gap.ui.group.GroupDetailScreen(
+                                viewModel = detailViewModel,
+                                onBack = { navController.popBackStack() }
                             )
                         }
                     }

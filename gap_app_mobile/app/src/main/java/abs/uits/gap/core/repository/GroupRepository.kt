@@ -19,6 +19,24 @@ class GroupRepository(private val apiService: ApiService) {
         }
     }
 
+    suspend fun getGroupDetail(id: Int): Result<abs.uits.gap.core.network.GroupDetailDto> {
+        return try {
+            val response = apiService.getGroupDetail(id)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null) {
+                    Result.success(body)
+                } else {
+                    Result.failure(Exception("Group detallari topilmadi"))
+                }
+            } else {
+                Result.failure(Exception(response.message()))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun createGroup(name: String): Result<Unit> {
         return try {
             val response = apiService.createGroup(
