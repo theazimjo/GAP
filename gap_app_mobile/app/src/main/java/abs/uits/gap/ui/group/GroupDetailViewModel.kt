@@ -16,6 +16,13 @@ sealed class GroupDetailState {
     data class Error(val message: String) : GroupDetailState()
 }
 
+sealed class AddMemberState {
+    object Idle : AddMemberState()
+    object Loading : AddMemberState()
+    object Success : AddMemberState()
+    data class Error(val message: String) : AddMemberState()
+}
+
 class GroupDetailViewModel(
     private val repository: GroupRepository,
     private val groupId: Int
@@ -23,6 +30,9 @@ class GroupDetailViewModel(
 
     private val _detailState = MutableStateFlow<GroupDetailState>(GroupDetailState.Loading)
     val detailState: StateFlow<GroupDetailState> = _detailState.asStateFlow()
+
+    private val _addMemberState = MutableStateFlow<AddMemberState>(AddMemberState.Idle)
+    val addMemberState: StateFlow<AddMemberState> = _addMemberState.asStateFlow()
 
     init {
         fetchGroupDetail()
@@ -38,6 +48,24 @@ class GroupDetailViewModel(
                 _detailState.value = GroupDetailState.Error(result.exceptionOrNull()?.message ?: "Xatolik")
             }
         }
+    }
+
+    fun addMember(phone: String) {
+        val phoneWithPrefix = if (phone.startsWith("+")) phone else "+998$phone"
+        _addMemberState.value = AddMemberState.Loading
+        viewModelScope.launch {
+            val result = repository.addMember(groupId, phoneWithPrefix)
+            if (result.isSuccess) {
+                _addMemberState.value = AddMemberState.Success
+                fetchGroupDetail() // Refresh list
+            } else {
+                _addMemberState.value = AddMemberState.Error(result.exceptionOrNull()?.message ?: "Xatolik")
+            }
+        }
+    }
+
+    fun resetAddMemberState() {
+        _addMemberState.value = AddMemberState.Idle
     }
 }
 

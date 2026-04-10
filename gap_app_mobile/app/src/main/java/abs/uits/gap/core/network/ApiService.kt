@@ -34,6 +34,9 @@ interface ApiService {
 
     @POST("groups")
     suspend fun createGroup(@Body request: CreateGroupRequest): Response<Any>
+
+    @POST("groups/add-member")
+    suspend fun addMember(@Body request: AddMemberRequest): Response<Any>
 }
 
 data class AuthResponse(
@@ -44,7 +47,8 @@ data class AuthResponse(
 data class UserDto(
     val id: String,
     val name: String,
-    val phone: String
+    val phone: String,
+    val avatarUrl: String? = null
 )
 
 data class OtpResponse(
@@ -80,6 +84,11 @@ data class GroupCountDto(
 
 data class CreateGroupRequest(
     val name: String
+)
+
+data class AddMemberRequest(
+    val groupId: Int,
+    val phone: String
 )
 
 data class GroupDetailDto(

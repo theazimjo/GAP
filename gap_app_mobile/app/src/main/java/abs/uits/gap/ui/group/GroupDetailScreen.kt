@@ -1,6 +1,7 @@
 package abs.uits.gap.ui.group
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,13 +29,30 @@ fun GroupDetailScreen(
     onBack: () -> Unit
 ) {
     val state by viewModel.detailState.collectAsState()
+    val addMemberState by viewModel.addMemberState.collectAsState()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    var showAddMemberModal by remember { mutableStateOf(false) }
     
     // iOS System Colors
     val iosBlue = Color(0xFF007AFF)
     val iosBg = Color(0xFFF2F2F7)
     val iosGray = Color(0xFF8E8E93)
 
+    LaunchedEffect(addMemberState) {
+        if (addMemberState is AddMemberState.Success) {
+            showAddMemberModal = false
+            scope.launch { snackbarHostState.showSnackbar("A'zo muvaffaqiyatli qo'shildi ✨") }
+            viewModel.resetAddMemberState()
+        } else if (addMemberState is AddMemberState.Error) {
+            scope.launch { snackbarHostState.showSnackbar((addMemberState as AddMemberState.Error).message) }
+            viewModel.resetAddMemberState()
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = iosBg,
         topBar = {
             CenterAlignedTopAppBar(
@@ -54,7 +73,7 @@ fun GroupDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Add member logic */ }) {
+                    IconButton(onClick = { showAddMemberModal = true }) {
                         Icon(Icons.Default.Add, contentDescription = "Add", tint = iosBlue)
                     }
                 },
@@ -128,6 +147,109 @@ fun GroupDetailScreen(
                     }
                 }
             }
+        }
+    }
+
+    if (showAddMemberModal) {
+        AddMemberModal(
+            onDismiss = { showAddMemberModal = false },
+            onAdd = { phone ->
+                viewModel.addMember(phone)
+            },
+            isLoading = addMemberState is AddMemberState.Loading
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddMemberModal(
+    onDismiss: () -> Unit,
+    onAdd: (String) -> Unit,
+    isLoading: Boolean
+) {
+    var phone by remember { mutableStateOf("") }
+    val iosBlue = Color(0xFF007AFF)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = Color(0xFFF2F2F7),
+        dragHandle = null
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 40.dp)
+        ) {
+            // iOS Modal Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Bekor qilish",
+                    color = iosBlue,
+                    fontSize = 17.sp,
+                    modifier = Modifier.clickable { onDismiss() }
+                )
+                Text(
+                    text = "A'zo qo'shish",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black
+                )
+                if (isLoading) {
+                    CircularProgressIndicator(color = iosBlue, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                } else {
+                    Text(
+                        text = "Qo'shish",
+                        color = if (phone.length == 9) iosBlue else Color(0xFF8E8E93),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable(enabled = phone.length == 9) { onAdd(phone) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // iOS Input Row
+            Surface(
+                color = Color.White,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("+998", fontSize = 17.sp, color = Color.Black)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextField(
+                        value = phone,
+                        onValueChange = { if (it.length <= 9) phone = it },
+                        placeholder = { Text("000000000", color = Color(0xFFC7C7CC)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = iosBlue
+                        ),
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone
+                        ),
+                        textStyle = LocalTextStyle.current.copy(fontSize = 17.sp)
+                    )
+                }
+            }
+            HorizontalDivider(color = Color(0xFFC6C6C8), thickness = 0.5.dp)
         }
     }
 }

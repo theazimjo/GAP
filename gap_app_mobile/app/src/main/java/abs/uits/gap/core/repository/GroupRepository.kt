@@ -51,4 +51,20 @@ class GroupRepository(private val apiService: ApiService) {
             Result.failure(e)
         }
     }
+
+    suspend fun addMember(groupId: Int, phone: String): Result<Unit> {
+        return try {
+            val response = apiService.addMember(
+                abs.uits.gap.core.network.AddMemberRequest(groupId, phone)
+            )
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: response.message()
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
