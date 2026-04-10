@@ -121,7 +121,7 @@ export const addMember = async (req: AuthRequest, res: Response) => {
 
 export const getGroupById = async (req: AuthRequest, res: Response) => {
   try {
-    const groupId = parseInt(req.params.id);
+    const groupId = parseInt(req.params.id as string, 10);
     const userId = req.userId;
 
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
