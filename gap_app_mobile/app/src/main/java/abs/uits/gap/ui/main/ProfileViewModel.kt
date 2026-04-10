@@ -16,12 +16,22 @@ sealed class ProfileState {
     data class Error(val message: String) : ProfileState()
 }
 
+sealed class UpdateProfileState {
+    object Idle : UpdateProfileState()
+    object Loading : UpdateProfileState()
+    object Success : UpdateProfileState()
+    data class Error(val message: String) : UpdateProfileState()
+}
+
 class ProfileViewModel(
     private val repository: AuthRepository
 ) : ViewModel() {
 
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Loading)
     val profileState: StateFlow<ProfileState> = _profileState.asStateFlow()
+
+    private val _updateState = MutableStateFlow<UpdateProfileState>(UpdateProfileState.Idle)
+    val updateState: StateFlow<UpdateProfileState> = _updateState.asStateFlow()
 
     init {
         fetchProfile()
@@ -37,6 +47,23 @@ class ProfileViewModel(
                 _profileState.value = ProfileState.Error(result.exceptionOrNull()?.message ?: "Xatolik yuz berdi")
             }
         }
+    }
+
+    fun updateProfile(name: String) {
+        _updateState.value = UpdateProfileState.Loading
+        viewModelScope.launch {
+            val result = repository.updateProfile(name)
+            if (result.isSuccess) {
+                _updateState.value = UpdateProfileState.Success
+                fetchProfile() // Refresh profile
+            } else {
+                _updateState.value = UpdateProfileState.Error(result.exceptionOrNull()?.message ?: "Xatolik")
+            }
+        }
+    }
+
+    fun resetUpdateState() {
+        _updateState.value = UpdateProfileState.Idle
     }
 }
 

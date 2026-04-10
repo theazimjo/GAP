@@ -43,4 +43,17 @@ class AuthRepository(private val apiService: ApiService) {
             Result.failure(e)
         }
     }
+
+    suspend fun updateProfile(name: String): Result<Unit> {
+        return try {
+            val response = apiService.updateProfile(abs.uits.gap.core.network.UpdateProfileRequest(name = name))
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Profilni yangilashda xatolik: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

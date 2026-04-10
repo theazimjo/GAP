@@ -4,6 +4,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface ApiService {
@@ -21,6 +22,9 @@ interface ApiService {
 
     @GET("auth/me")
     suspend fun getMe(): Response<ProfileDto>
+
+    @PUT("auth/me")
+    suspend fun updateProfile(@Body body: UpdateProfileRequest): Response<Any>
 
     @GET("groups")
     suspend fun getGroups(): Response<List<GroupDto>>
@@ -54,6 +58,11 @@ data class ProfileDto(
     val phone: String,
     val avatarUrl: String?,
     val createdAt: String
+)
+
+data class UpdateProfileRequest(
+    val name: String? = null,
+    val avatarUrl: String? = null
 )
 
 data class GroupDto(
