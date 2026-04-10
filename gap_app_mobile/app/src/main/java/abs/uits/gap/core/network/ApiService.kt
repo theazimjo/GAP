@@ -16,6 +16,12 @@ interface ApiService {
 
     @POST("auth/verify-otp")
     suspend fun verifyOtp(@Body body: Map<String, String>): Response<AuthResponse>
+
+    @retrofit2.http.GET("groups")
+    suspend fun getGroups(): Response<List<GroupDto>>
+
+    @POST("groups")
+    suspend fun createGroup(@Body request: CreateGroupRequest): Response<Any>
 }
 
 data class AuthResponse(
@@ -32,4 +38,21 @@ data class UserDto(
 data class OtpResponse(
     val otpCode: String,
     val message: String?
+)
+
+data class GroupDto(
+    val id: Int,
+    val name: String,
+    val totalPool: Double,
+    val contributionAmount: Double,
+    val creator: UserDto,
+    val _count: GroupCountDto
+)
+
+data class GroupCountDto(
+    val members: Int
+)
+
+data class CreateGroupRequest(
+    val name: String
 )

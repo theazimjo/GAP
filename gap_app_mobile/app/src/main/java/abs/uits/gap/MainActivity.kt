@@ -63,8 +63,12 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("groupList") {
+                            val groupFactory = remember { abs.uits.gap.ui.group.GroupViewModelFactory(app.groupRepository) }
+                            val groupViewModel: abs.uits.gap.ui.group.GroupViewModel = viewModel(factory = groupFactory)
+                            
                             GroupListScreen(
                                 authViewModel = authViewModel,
+                                groupViewModel = groupViewModel,
                                 onLogout = {
                                     app.tokenStorage.clear()
                                     authViewModel.resetState()
