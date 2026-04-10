@@ -25,6 +25,33 @@ export const getMe = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const updateMe = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+    const { name, avatarUrl } = req.body;
+
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+    if (name && name.trim().length === 0) {
+      return res.status(400).json({ message: 'Name cannot be empty' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(name && { name: name.trim() }),
+        ...(avatarUrl && { avatarUrl }),
+      },
+      select: { id: true, name: true, phone: true, avatarUrl: true, createdAt: true },
+    });
+
+    res.json({ message: 'Profile updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export const register = async (req: Request, res: Response) => {
   try {
     const { name, phone, password } = req.body;
