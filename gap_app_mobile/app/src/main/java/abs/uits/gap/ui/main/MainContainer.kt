@@ -7,12 +7,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import abs.uits.gap.GapApplication
 import abs.uits.gap.ui.auth.AuthViewModel
 import abs.uits.gap.ui.group.GroupListScreen
 import abs.uits.gap.ui.group.GroupViewModel
+import abs.uits.gap.ui.profile.ProfileScreen
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun MainContainer(
@@ -28,36 +30,47 @@ fun MainContainer(
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf(
         BottomNavItem.Home,
-        BottomNavItem.History,
-        BottomNavItem.Notifications,
         BottomNavItem.Profile
     )
     
-    val bluePrimary = Color(0xFF1976D2)
+    // iOS System Colors
+    val iosBlue = Color(0xFF007AFF)
+    val iosGray = Color(0xFF8E8E93)
+    val iosBg = Color(0xFFF2F2F7)
 
     Scaffold(
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
-                contentColor = bluePrimary
+                containerColor = Color.White.copy(alpha = 0.95f),
+                tonalElevation = 8.dp
             ) {
                 items.forEachIndexed { index, item ->
+                    val isSelected = selectedItem == index
                     NavigationBarItem(
-                        icon = { Icon(item.icon, contentDescription = item.title) },
-                        label = { Text(item.title) },
-                        selected = selectedItem == index,
+                        icon = { 
+                            Icon(
+                                item.icon, 
+                                contentDescription = item.title,
+                                tint = if (isSelected) iosBlue else iosGray
+                            ) 
+                        },
+                        label = { 
+                            Text(
+                                item.title, 
+                                fontSize = 10.sp, 
+                                color = if (isSelected) iosBlue else iosGray
+                            ) 
+                        },
+                        selected = isSelected,
                         onClick = { selectedItem = index },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = bluePrimary,
-                            selectedTextColor = bluePrimary,
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray,
-                            indicatorColor = Color(0xFFE3F2FD)
+                            indicatorColor = Color.Transparent // iOS has no selection pill
                         )
                     )
                 }
             }
-        }
+        },
+        containerColor = iosBg
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when (selectedItem) {
@@ -66,9 +79,7 @@ fun MainContainer(
                     groupViewModel = groupViewModel,
                     onNavigateToDetail = onNavigateToDetail
                 )
-                1 -> HistoryScreen()
-                2 -> NotificationsScreen()
-                3 -> {
+                1 -> {
                     ProfileScreen(
                         viewModel = profileViewModel,
                         onLogout = onLogout

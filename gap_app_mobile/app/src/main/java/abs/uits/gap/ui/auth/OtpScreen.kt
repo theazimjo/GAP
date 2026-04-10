@@ -7,21 +7,17 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -47,9 +43,10 @@ fun OtpScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val bluePrimary = Color(0xFF1976D2)
-    val lightGray = Color(0xFFF0F4F8)
-    val greenVariant = Color(0xFF00796B)
+    // iOS System Colors
+    val iosBlue = Color(0xFF007AFF)
+    val iosBg = Color(0xFFF2F2F7)
+    val iosGray = Color(0xFF8E8E93)
     
     var timeLeft by remember { mutableStateOf(45) }
 
@@ -59,11 +56,9 @@ fun OtpScreen(
         if (isGranted) {
             try {
                 val smsManager = SmsManager.getDefault()
-                smsManager.sendTextMessage(phone, null, "GAP verification code: $otpCode", null, null)
-                Toast.makeText(context, "SMS sent!", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                // Handle error silenly or toast
-            }
+                smsManager.sendTextMessage("+998$phone", null, "GAP tasdiqlash kodi: $otpCode", null, null)
+                Toast.makeText(context, "SMS yuborildi!", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {}
         }
     }
 
@@ -90,15 +85,16 @@ fun OtpScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = Color.White,
+        containerColor = iosBg,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { 
-                    Text("Gap", color = bluePrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp) 
-                },
+                title = { Text("Tasdiqlash", fontSize = 17.sp, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = bluePrimary)
+                    TextButton(onClick = onBack) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(20.dp), tint = iosBlue)
+                            Text("Orqaga", color = iosBlue, fontSize = 17.sp)
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
@@ -112,38 +108,21 @@ fun OtpScreen(
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Shield Icon inside circles
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .background(Color(0xFFE3F2FD), CircleShape)
-                    .padding(20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Shield,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = bluePrimary
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(60.dp))
             
             Text(
-                "Verify Identity",
+                "Kodni kiriting",
                 fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                "We've sent a 6-digit code to $phone",
-                fontSize = 14.sp,
-                color = Color.DarkGray,
-                textAlign = TextAlign.Center
+                "Biz +998 $phone raqamiga\n6 xonali tasdiqlash kodini yubordik",
+                fontSize = 17.sp,
+                color = iosGray,
+                textAlign = TextAlign.Center,
+                lineHeight = 22.sp
             )
             
             Spacer(modifier = Modifier.height(48.dp))
@@ -164,20 +143,20 @@ fun OtpScreen(
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .aspectRatio(0.8f)
-                                    .background(lightGray, RoundedCornerShape(12.dp))
+                                    .aspectRatio(0.85f)
+                                    .background(Color.White, RoundedCornerShape(10.dp))
                                     .border(
-                                        width = 1.dp,
-                                        color = if (isFocused) bluePrimary else Color.Transparent,
-                                        shape = RoundedCornerShape(12.dp)
+                                        width = if (isFocused) 2.dp else 0.5.dp,
+                                        color = if (isFocused) iosBlue else Color(0xFFC6C6C8),
+                                        shape = RoundedCornerShape(10.dp)
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = char,
-                                    fontSize = 24.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = bluePrimary
+                                    fontSize = 28.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = Color.Black
                                 )
                             }
                         }
@@ -185,71 +164,60 @@ fun OtpScreen(
                 }
             )
             
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Timer Pill
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = Color(0xFFE8F5E9)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.Lock, contentDescription = null, tint = greenVariant, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    val timeStr = if (timeLeft < 10) "00:0$timeLeft" else "00:$timeLeft"
-                    Text(timeStr, color = greenVariant, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(48.dp))
             
             Button(
                 onClick = {
                     if (codeInput.length == 6) {
-                        viewModel.verifyOtp(phone, codeInput)
+                        viewModel.verifyOtp("+998$phone", codeInput)
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(28.dp), spotColor = bluePrimary),
-                shape = RoundedCornerShape(28.dp),
-                enabled = authState != AuthState.Loading,
-                colors = ButtonDefaults.buttonColors(containerColor = bluePrimary)
+                    .height(54.dp),
+                shape = RoundedCornerShape(12.dp),
+                enabled = authState != AuthState.Loading && codeInput.length == 6,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = iosBlue,
+                    disabledContainerColor = iosBlue.copy(alpha = 0.5f)
+                )
             ) {
                 if (authState == AuthState.Loading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 } else {
-                    Text("Verify Code", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("Tasdiqlash", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                 }
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Didn't receive the code?", color = Color.Gray, fontSize = 14.sp)
-                Spacer(modifier = Modifier.width(8.dp))
-                Surface(
-                    onClick = { 
-                        if(timeLeft == 0) { 
-                            timeLeft = 45; viewModel.requestOtp(phone) 
-                        } 
-                    },
-                    color = if(timeLeft == 0) greenVariant else Color.LightGray,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Resend Code", color = Color.White, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontWeight = FontWeight.Bold)
-                }
-            }
-            
-            Spacer(modifier = Modifier.weight(1f))
-            
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 24.dp)) {
-                Icon(Icons.Default.Shield, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(14.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("END-TO-END ENCRYPTED", color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            if (timeLeft > 0) {
+                Text(
+                    "Kodni qayta yuborish: 00:${if (timeLeft < 10) "0$timeLeft" else timeLeft}",
+                    color = iosGray,
+                    fontSize = 15.sp
+                )
+            } else {
+                Text(
+                    "Kod kelmadimi?",
+                    color = iosGray,
+                    fontSize = 15.sp,
+                    modifier = Modifier.clickable { 
+                        timeLeft = 45
+                        viewModel.requestOtp(phone)
+                    }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Qayta yuborish",
+                    color = iosBlue,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.clickable { 
+                        timeLeft = 45
+                        viewModel.requestOtp(phone)
+                    }
+                )
             }
         }
     }
