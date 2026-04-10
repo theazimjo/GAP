@@ -66,18 +66,18 @@ class MainActivity : ComponentActivity() {
                             val groupFactory = remember { abs.uits.gap.ui.group.GroupViewModelFactory(app.groupRepository) }
                             val groupViewModel: abs.uits.gap.ui.group.GroupViewModel = viewModel(factory = groupFactory)
                             
-                            GroupListScreen(
+                            abs.uits.gap.ui.main.MainContainer(
                                 authViewModel = authViewModel,
                                 groupViewModel = groupViewModel,
+                                onNavigateToDetail = { groupId ->
+                                    navController.navigate("groupDetail/$groupId")
+                                },
                                 onLogout = {
                                     app.tokenStorage.clear()
                                     authViewModel.resetState()
                                     navController.navigate("login") {
                                         popUpTo("groupList") { inclusive = true }
                                     }
-                                },
-                                onNavigateToDetail = { groupId ->
-                                    navController.navigate("groupDetail/$groupId")
                                 }
                             )
                         }

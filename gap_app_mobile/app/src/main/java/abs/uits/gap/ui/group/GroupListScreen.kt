@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 fun GroupListScreen(
     authViewModel: AuthViewModel,
     groupViewModel: GroupViewModel,
-    onLogout: () -> Unit,
     onNavigateToDetail: (Int) -> Unit
 ) {
     val listState by groupViewModel.listState.collectAsState()
@@ -61,11 +60,6 @@ fun GroupListScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Mening GAPlarim", color = bluePrimary, fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Chiqish", tint = Color.Gray)
-                    }
-                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
             )
         },

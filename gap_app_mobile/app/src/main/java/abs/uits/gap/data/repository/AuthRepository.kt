@@ -30,4 +30,17 @@ class AuthRepository(private val apiService: ApiService) {
             Result.failure(e)
         }
     }
+
+    suspend fun getMe(): Result<abs.uits.gap.core.network.ProfileDto> {
+        return try {
+            val response = apiService.getMe()
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Profil ma'lumotlarini yuklashda xatolik: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

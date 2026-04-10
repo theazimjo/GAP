@@ -19,6 +19,9 @@ interface ApiService {
     @POST("auth/verify-otp")
     suspend fun verifyOtp(@Body body: Map<String, String>): Response<AuthResponse>
 
+    @GET("auth/me")
+    suspend fun getMe(): Response<ProfileDto>
+
     @GET("groups")
     suspend fun getGroups(): Response<List<GroupDto>>
 
@@ -43,6 +46,14 @@ data class UserDto(
 data class OtpResponse(
     val otpCode: String,
     val message: String?
+)
+
+data class ProfileDto(
+    val id: String,
+    val name: String,
+    val phone: String,
+    val avatarUrl: String?,
+    val createdAt: String
 )
 
 data class GroupDto(
