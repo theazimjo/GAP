@@ -118,3 +118,47 @@ export const addMember = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export const getGroupById = async (req: AuthRequest, res: Response) => {
+  try {
+    const groupId = parseInt(req.params.id);
+    const userId = req.userId;
+
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+    if (isNaN(groupId)) return res.status(400).json({ message: 'Invalid group ID' });
+
+    // Ensure the requester is a member of this group
+    const membership = await prisma.membership.findUnique({
+      where: {
+        userId_groupId: { userId, groupId },
+      },
+    });
+
+    if (!membership) {
+      return res.status(403).json({ message: 'You are not a member of this group' });
+    }
+
+    const group = await prisma.group.findUnique({
+      where: { id: groupId },
+      include: {
+        creator: {
+          select: { id: true, name: true, phone: true },
+        },
+        members: {
+          include: {
+            user: {
+              select: { id: true, name: true, phone: true, avatarUrl: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!group) return res.status(404).json({ message: 'Group not found' });
+
+    res.json(group);
+  } catch (error) {
+    console.error('Get group detail error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createGroup, getGroups, addMember } from '../controllers/group';
+import { createGroup, getGroups, addMember, getGroupById } from '../controllers/group';
 import { authenticate } from '../middleware/auth';
 
 const router = Router();
@@ -10,5 +10,6 @@ router.use(authenticate);
 router.post('/', createGroup);
 router.get('/', getGroups);
 router.post('/add-member', addMember);
+router.get('/:id', getGroupById);
 
 export default router;
