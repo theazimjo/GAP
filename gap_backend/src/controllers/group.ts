@@ -88,10 +88,16 @@ export const addMember = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ message: 'Only admins can add members' });
     }
 
-    // Find user to add
-    const userToAdd = await prisma.user.findUnique({ where: { phone } });
+    // Find user to add or create placeholder
+    let userToAdd = await prisma.user.findUnique({ where: { phone } });
     if (!userToAdd) {
-      return res.status(404).json({ message: 'User not found' });
+      userToAdd = await prisma.user.create({
+        data: {
+          phone,
+          name: 'Yangi foydalanuvchi',
+          passwordHash: '', // OTP logic will overwrite this if they join
+        },
+      });
     }
 
     // Check if already a member

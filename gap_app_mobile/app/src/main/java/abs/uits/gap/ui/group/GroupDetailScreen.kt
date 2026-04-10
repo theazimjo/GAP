@@ -1,5 +1,10 @@
 package abs.uits.gap.ui.group
 
+import android.Manifest
+import android.content.Context
+import android.provider.ContactsContract
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,11 +17,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -170,6 +177,32 @@ fun AddMemberModal(
 ) {
     var phone by remember { mutableStateOf("") }
     val iosBlue = Color(0xFF007AFF)
+    val context = LocalContext.current
+
+    val pickContactLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickContact()
+    ) { uri ->
+        uri?.let {
+            val contactPhone = extractPhoneNumber(context, it)
+            contactPhone?.let { fullNum ->
+                // Clean the number and extract last 9 digits if it's Uzbek
+                val cleaned = fullNum.replace(Regex("[^0-9]"), "")
+                phone = if (cleaned.length >= 9) {
+                    cleaned.takeLast(9)
+                } else {
+                    cleaned
+                }
+            }
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            pickContactLauncher.launch(null)
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -233,7 +266,7 @@ fun AddMemberModal(
                         value = phone,
                         onValueChange = { if (it.length <= 9) phone = it },
                         placeholder = { Text("000000000", color = Color(0xFFC7C7CC)) },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.weight(1f),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
@@ -247,11 +280,40 @@ fun AddMemberModal(
                         ),
                         textStyle = LocalTextStyle.current.copy(fontSize = 17.sp)
                     )
+                    IconButton(onClick = { permissionLauncher.launch(Manifest.permission.READ_CONTACTS) }) {
+                        Icon(Icons.Default.Contacts, contentDescription = "Contacts", tint = iosBlue)
+                    }
                 }
             }
             HorizontalDivider(color = Color(0xFFC6C6C8), thickness = 0.5.dp)
         }
     }
+}
+
+private fun extractPhoneNumber(context: Context, uri: android.net.Uri): String? {
+    var phoneNumber: String? = null
+    val cursor = context.contentResolver.query(uri, null, null, null, null)
+    cursor?.use {
+        if (it.moveToFirst()) {
+            val id = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts._ID))
+            val hasPhoneNumber = it.getInt(it.getColumnIndexOrThrow(ContactsContract.Contacts.HAS_PHONE_NUMBER))
+            if (hasPhoneNumber > 0) {
+                val phones = context.contentResolver.query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null,
+                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + id,
+                    null,
+                    null
+                )
+                phones?.use { pCursor ->
+                    if (pCursor.moveToFirst()) {
+                        phoneNumber = pCursor.getString(pCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                    }
+                }
+            }
+        }
+    }
+    return phoneNumber
 }
 
 @Composable
