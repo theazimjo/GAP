@@ -2,8 +2,28 @@ import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import bcrypt from 'bcrypt';
 import { signToken } from '../utils/jwt';
+import { AuthRequest } from '../middleware/auth';
 
 // const prisma = new PrismaClient(); // Handled by singleton
+
+export const getMe = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, phone: true, avatarUrl: true, createdAt: true },
+    });
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user);
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 export const register = async (req: Request, res: Response) => {
   try {
