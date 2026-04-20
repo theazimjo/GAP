@@ -3,7 +3,9 @@ package abs.uits.gap.ui.main
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Contacts
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,27 +22,46 @@ sealed class BottomNavItem(
     val title: String,
     val icon: ImageVector
 ) {
-    object Home : BottomNavItem("home", "Asosiy", Icons.Default.Group)
+    object Home : BottomNavItem("home", "Asosiy", Icons.Default.Home)
+    object Contacts : BottomNavItem("contacts", "Kontaktlar", Icons.Default.Contacts)
+    object Groups : BottomNavItem("groups", "Gaplar", Icons.Default.Chat)
     object Profile : BottomNavItem("profile", "Profil", Icons.Default.Person)
 }
 
 @Composable
 fun PlaceholderScreen(title: String, description: String, icon: ImageVector) {
+    val themeBeige = Color(0xFFF2EEE4)
+    val themeRust = Color(0xFFB24F2C)
+    val themeSecondaryText = Color(0xFF757575)
+
     Box(
-        modifier = Modifier.fillMaxSize().background(Color(0xFFF2F2F7)),
+        modifier = Modifier.fillMaxSize().background(themeBeige),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(80.dp),
-                tint = Color(0xFF8E8E93).copy(alpha = 0.5f)
+                modifier = Modifier.size(100.dp),
+                tint = themeRust.copy(alpha = 0.2f)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(title, fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(description, color = Color(0xFF8E8E93), fontSize = 15.sp)
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = title,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = themeRust
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = description,
+                color = themeSecondaryText,
+                fontSize = 16.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
         }
     }
 }

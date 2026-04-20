@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
@@ -38,10 +39,10 @@ fun GroupListScreen(
 
     var showCreateModal by remember { mutableStateOf(false) }
 
-    // iOS System Colors
-    val iosBlue = Color(0xFF007AFF)
-    val iosBg = Color(0xFFF2F2F7)
-    val iosGray = Color(0xFF8E8E93)
+    // Premium Theme Colors
+    val themeRust = Color(0xFFB24F2C)
+    val themeBeige = Color(0xFFF2EEE4)
+    val themeSecondaryText = Color(0xFF757575)
 
     LaunchedEffect(createState) {
         if (createState is CreateGroupState.Success) {
@@ -56,25 +57,25 @@ fun GroupListScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = iosBg,
+        containerColor = themeBeige,
         topBar = {
             LargeTopAppBar(
                 title = { 
                     Text(
                         "Mening GAPlarim", 
-                        color = Color.Black, 
+                        color = Color(0xFF424242), 
                         fontWeight = FontWeight.Bold, 
-                        fontSize = 34.sp
+                        fontSize = 32.sp
                     )
                 },
                 actions = {
                     IconButton(onClick = { showCreateModal = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add", tint = iosBlue)
+                        Icon(Icons.Default.Add, contentDescription = "Add", tint = themeRust)
                     }
                 },
                 colors = TopAppBarDefaults.largeTopAppBarColors(
-                    containerColor = iosBg,
-                    scrolledContainerColor = Color.White.copy(alpha = 0.95f)
+                    containerColor = themeBeige,
+                    scrolledContainerColor = themeBeige.copy(alpha = 0.95f)
                 )
             )
         }
@@ -84,7 +85,7 @@ fun GroupListScreen(
                 is GroupListState.Loading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = iosBlue
+                        color = themeRust
                     )
                 }
                 is GroupListState.Error -> {
@@ -95,7 +96,7 @@ fun GroupListScreen(
                         Text(state.message, color = Color.Red, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                         Spacer(modifier = Modifier.height(16.dp))
                         TextButton(onClick = { groupViewModel.fetchGroups() }) {
-                            Text("Qayta yuklash", color = iosBlue)
+                            Text("Qayta yuklash", color = themeRust)
                         }
                     }
                 }
@@ -106,13 +107,13 @@ fun GroupListScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(
-                                Icons.Default.Group, 
+                                Icons.Default.Chat, 
                                 contentDescription = null, 
-                                modifier = Modifier.size(64.dp), 
-                                tint = iosGray.copy(alpha = 0.3f)
+                                modifier = Modifier.size(80.dp), 
+                                tint = themeRust.copy(alpha = 0.1f)
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text("Hali guruhlar yo'q", color = iosGray, fontSize = 17.sp)
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text("Hali GAPlar yo'q", color = themeSecondaryText, fontSize = 17.sp)
                         }
                     } else {
                         // iOS Inset Grouped Style
@@ -159,8 +160,8 @@ fun GroupListScreen(
 
 @Composable
 fun GroupItem(group: GroupDto, onClick: () -> Unit) {
-    val iosBlue = Color(0xFF007AFF)
-    val iosGray = Color(0xFF8E8E93)
+    val themeRust = Color(0xFFB24F2C)
+    val themeSecondaryText = Color(0xFF757575)
 
     Row(
         modifier = Modifier
@@ -172,46 +173,46 @@ fun GroupItem(group: GroupDto, onClick: () -> Unit) {
         // Icon / Initial
         Box(
             modifier = Modifier
-                .size(36.dp)
-                .background(iosBlue, RoundedCornerShape(8.dp)),
+                .size(44.dp)
+                .background(themeRust.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 group.name.take(1).uppercase(),
-                color = Color.White,
+                color = themeRust,
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                fontSize = 20.sp
             )
         }
         
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(16.dp))
         
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 group.name,
                 fontSize = 17.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Black
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF424242)
             )
             Text(
                 "Tashkilotchi: ${group.creator.name}",
                 fontSize = 13.sp,
-                color = iosGray
+                color = themeSecondaryText
             )
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "${group._count.members}",
-                color = iosGray,
-                fontSize = 17.sp
+                color = themeSecondaryText,
+                fontSize = 15.sp
             )
             Spacer(modifier = Modifier.width(4.dp))
             Icon(
                 Icons.Default.ChevronRight,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = Color(0xFFC7C7CC)
+                tint = themeRust.copy(alpha = 0.3f)
             )
         }
     }
@@ -225,11 +226,13 @@ fun CreateGroupModal(
     isCreating: Boolean
 ) {
     var name by remember { mutableStateOf("") }
-    val iosBlue = Color(0xFF007AFF)
+    val themeRust = Color(0xFFB24F2C)
+    val themeBeige = Color(0xFFF2EEE4)
+    val themeSecondaryText = Color(0xFF757575)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFFF2F2F7),
+        containerColor = themeBeige,
         dragHandle = null
     ) {
         Column(
@@ -241,59 +244,62 @@ fun CreateGroupModal(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                    .padding(horizontal = 16.dp, vertical = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Bekor qilish",
-                    color = iosBlue,
+                    color = themeSecondaryText,
                     fontSize = 17.sp,
                     modifier = Modifier.clickable { onDismiss() }
                 )
                 Text(
-                    text = "Yangi guruh",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
+                    text = "Yangi GAP",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF424242)
                 )
                 if (isCreating) {
-                    CircularProgressIndicator(color = iosBlue, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    CircularProgressIndicator(color = themeRust, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
                     Text(
                         text = "Yaratish",
-                        color = if (name.isNotBlank()) iosBlue else Color(0xFF8E8E93),
+                        color = if (name.isNotBlank()) themeRust else themeSecondaryText.copy(alpha = 0.4f),
                         fontSize = 17.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable(enabled = name.isNotBlank()) { onCreate(name) }
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // iOS Input Row
+            // Premium Input Row
             Surface(
-                color = Color.White,
-                modifier = Modifier.fillMaxWidth()
+                color = Color.White.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 TextField(
                     value = name,
                     onValueChange = { name = it },
-                    placeholder = { Text("Guruh nomi", color = Color(0xFFC7C7CC)) },
+                    placeholder = { Text("Guruh nomi", color = themeSecondaryText.copy(alpha = 0.5f)) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = iosBlue
+                        cursorColor = themeRust
                     ),
                     singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(fontSize = 17.sp)
+                    textStyle = LocalTextStyle.current.copy(fontSize = 17.sp, color = Color(0xFF424242))
                 )
             }
-            HorizontalDivider(color = Color(0xFFC6C6C8), thickness = 0.5.dp)
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

@@ -10,7 +10,10 @@ val Blue40 = Color(0xFF1976D2)
 val BlueGrey40 = Color(0xFF455A64)
 val Teal40 = Color(0xFF00796B)
 
-val BackgroundLight = Color(0xFFF0F4F8)
+val BackgroundLight = Color(0xFFF2EEE4) // Warm Beige
 val SurfaceLight = Color(0xFFFFFFFF)
-val TextPrimary = Color(0xFF1E293B)
-val TextSecondary = Color(0xFF64748B)
+val TextPrimary = Color(0xFF424242)
+val TextSecondary = Color(0xFF757575)
+
+val ThemeBeige = Color(0xFFF2EEE4)
+val ThemeRust = Color(0xFFB24F2C)

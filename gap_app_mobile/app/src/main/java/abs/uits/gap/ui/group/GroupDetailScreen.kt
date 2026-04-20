@@ -42,10 +42,11 @@ fun GroupDetailScreen(
     
     var showAddMemberModal by remember { mutableStateOf(false) }
     
-    // iOS System Colors
-    val iosBlue = Color(0xFF007AFF)
-    val iosBg = Color(0xFFF2F2F7)
-    val iosGray = Color(0xFF8E8E93)
+    // Premium Theme Colors
+    val themeRust = Color(0xFFB24F2C)
+    val themeBeige = Color(0xFFF2EEE4)
+    val themeText = Color(0xFF424242)
+    val themeSecondaryText = Color(0xFF757575)
 
     LaunchedEffect(addMemberState) {
         if (addMemberState is AddMemberState.Success) {
@@ -60,7 +61,7 @@ fun GroupDetailScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = iosBg,
+        containerColor = themeBeige,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { 
@@ -69,23 +70,23 @@ fun GroupDetailScreen(
                     } else {
                         "Guruh"
                     }
-                    Text(titleText, color = Color.Black, fontWeight = FontWeight.SemiBold, fontSize = 17.sp) 
+                    Text(titleText, color = themeText, fontWeight = FontWeight.Bold, fontSize = 18.sp) 
                 },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(20.dp), tint = iosBlue)
-                            Text("Orqaga", color = iosBlue, fontSize = 17.sp)
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(20.dp), tint = themeRust)
+                            Text("Orqaga", color = themeRust, fontSize = 17.sp, fontWeight = FontWeight.Medium)
                         }
                     }
                 },
                 actions = {
                     IconButton(onClick = { showAddMemberModal = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add", tint = iosBlue)
+                        Icon(Icons.Default.Add, contentDescription = "Add", tint = themeRust)
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White.copy(alpha = 0.95f)
+                    containerColor = themeBeige.copy(alpha = 0.95f)
                 )
             )
         }
@@ -95,7 +96,7 @@ fun GroupDetailScreen(
                 is GroupDetailState.Loading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = iosBlue
+                        color = themeRust
                     )
                 }
                 is GroupDetailState.Error -> {
@@ -106,7 +107,7 @@ fun GroupDetailScreen(
                         Text(currentState.message, color = Color.Red)
                         Spacer(modifier = Modifier.height(16.dp))
                         TextButton(onClick = { viewModel.fetchGroupDetail() }) {
-                            Text("Qayta urinish", color = iosBlue)
+                            Text("Qayta urinish", color = themeRust)
                         }
                     }
                 }
@@ -122,9 +123,9 @@ fun GroupDetailScreen(
                             Text(
                                 "A'ZOLAR (${group.members.size})",
                                 fontSize = 13.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = iosGray,
-                                modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
+                                fontWeight = FontWeight.Bold,
+                                color = themeSecondaryText,
+                                modifier = Modifier.padding(start = 24.dp, bottom = 12.dp)
                             )
                         }
 
@@ -133,8 +134,8 @@ fun GroupDetailScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.White),
-                                shape = RoundedCornerShape(10.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
+                                shape = RoundedCornerShape(16.dp),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                             ) {
                                 Column {
@@ -142,9 +143,9 @@ fun GroupDetailScreen(
                                         MemberItem(member = member)
                                         if (index < group.members.size - 1) {
                                             HorizontalDivider(
-                                                modifier = Modifier.padding(start = 56.dp),
-                                                color = Color(0xFFC6C6C8),
-                                                thickness = 0.5.dp
+                                                modifier = Modifier.padding(start = 64.dp),
+                                                color = themeBeige,
+                                                thickness = 1.dp
                                             )
                                         }
                                     }
@@ -206,53 +207,60 @@ fun AddMemberModal(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFFF2F2F7),
+        containerColor = Color(0xFFF2EEE4),
         dragHandle = null
     ) {
+        val themeRust = Color(0xFFB24F2C)
+        val themeText = Color(0xFF424242)
+        val themeSecondaryText = Color(0xFF757575)
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 40.dp)
         ) {
-            // iOS Modal Header
+            // Premium Modal Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                    .padding(horizontal = 16.dp, vertical = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Bekor qilish",
-                    color = iosBlue,
+                    color = themeSecondaryText,
                     fontSize = 17.sp,
                     modifier = Modifier.clickable { onDismiss() }
                 )
                 Text(
                     text = "A'zo qo'shish",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = themeText
                 )
                 if (isLoading) {
-                    CircularProgressIndicator(color = iosBlue, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    CircularProgressIndicator(color = themeRust, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
                     Text(
                         text = "Qo'shish",
-                        color = if (phone.length == 9) iosBlue else Color(0xFF8E8E93),
+                        color = if (phone.length == 9) themeRust else themeSecondaryText.copy(alpha = 0.4f),
                         fontSize = 17.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable(enabled = phone.length == 9) { onAdd(phone) }
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // iOS Input Row
+            // Premium Input Row
             Surface(
-                color = Color.White,
-                modifier = Modifier.fillMaxWidth()
+                color = Color.White.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -260,32 +268,32 @@ fun AddMemberModal(
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("+998", fontSize = 17.sp, color = Color.Black)
+                    Text("+998", fontSize = 17.sp, color = themeText, fontWeight = FontWeight.Medium)
                     Spacer(modifier = Modifier.width(8.dp))
                     TextField(
                         value = phone,
                         onValueChange = { if (it.length <= 9) phone = it },
-                        placeholder = { Text("000000000", color = Color(0xFFC7C7CC)) },
+                        placeholder = { Text("000000000", color = themeSecondaryText.copy(alpha = 0.5f)) },
                         modifier = Modifier.weight(1f),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
-                            cursorColor = iosBlue
+                            cursorColor = themeRust
                         ),
                         singleLine = true,
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                             keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone
                         ),
-                        textStyle = LocalTextStyle.current.copy(fontSize = 17.sp)
+                        textStyle = LocalTextStyle.current.copy(fontSize = 17.sp, color = themeText)
                     )
                     IconButton(onClick = { permissionLauncher.launch(Manifest.permission.READ_CONTACTS) }) {
-                        Icon(Icons.Default.Contacts, contentDescription = "Contacts", tint = iosBlue)
+                        Icon(Icons.Default.Contacts, contentDescription = "Contacts", tint = themeRust)
                     }
                 }
             }
-            HorizontalDivider(color = Color(0xFFC6C6C8), thickness = 0.5.dp)
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
@@ -318,8 +326,9 @@ private fun extractPhoneNumber(context: Context, uri: android.net.Uri): String? 
 
 @Composable
 fun MemberItem(member: abs.uits.gap.core.network.MemberDto) {
-    val iosGray = Color(0xFF8E8E93)
-    val iosBlue = Color(0xFF007AFF)
+    val themeRust = Color(0xFFB24F2C)
+    val themeText = Color(0xFF424242)
+    val themeSecondaryText = Color(0xFF757575)
 
     Row(
         modifier = Modifier
@@ -329,24 +338,30 @@ fun MemberItem(member: abs.uits.gap.core.network.MemberDto) {
     ) {
         Box(
             modifier = Modifier
-                .size(32.dp)
-                .background(Color(0xFFE5E5EA), CircleShape),
+                .size(36.dp)
+                .background(themeRust.copy(alpha = 0.05f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Default.Person, contentDescription = null, tint = iosGray, modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.Person, contentDescription = null, tint = themeRust, modifier = Modifier.size(20.dp))
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(member.user.name, fontWeight = FontWeight.Normal, fontSize = 17.sp, color = Color.Black)
-            Text(member.user.phone, color = iosGray, fontSize = 13.sp)
+            Text(member.user.name, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = themeText)
+            Text(member.user.phone, color = themeSecondaryText, fontSize = 13.sp)
         }
         if (member.role == "admin") {
-            Text(
-                "Admin",
-                color = iosBlue,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Normal
-            )
+            Surface(
+                color = themeRust.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(4.dp)
+            ) {
+                Text(
+                    "Admin",
+                    color = themeRust,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+            }
         }
     }
 }

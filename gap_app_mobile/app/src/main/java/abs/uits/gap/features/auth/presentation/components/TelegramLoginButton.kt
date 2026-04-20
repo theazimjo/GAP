@@ -20,17 +20,23 @@ fun TelegramLoginButton(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false
 ) {
+    val themeRust = Color(0xFFB24F2C)
+    
     Button(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(16.dp),
+            .height(58.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF54A9EB), // Telegram Blue
+            containerColor = themeRust,
             contentColor = Color.White
         ),
-        enabled = !isLoading
+        enabled = !isLoading,
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 0.dp
+        )
     ) {
         if (isLoading) {
             CircularProgressIndicator(
@@ -43,17 +49,17 @@ fun TelegramLoginButton(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                // We'll use a placeholder icon or Send icon if telegram icon repo not available
                 Icon(
                     imageVector = Icons.Default.Send,
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "Telegram orqali kirish",
                     fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.5.sp
                 )
             }
         }
