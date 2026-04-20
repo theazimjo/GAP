@@ -1,11 +1,13 @@
 package abs.uits.gap.ui.profile
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContactPage
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
@@ -78,13 +80,15 @@ fun ProfileScreen(
                 }
                 is ProfileState.Success -> {
                     val user = currentState.user
+                    val isVerified = user.phone != null && !user.phone.startsWith("tg_")
+                    
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(top = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Premium Header
+                        // Premium Toolbar-like Header
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -94,93 +98,147 @@ fun ProfileScreen(
                         ) {
                             Text(
                                 text = "Profil",
-                                fontSize = 32.sp,
+                                fontSize = 28.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = themeText
                             )
-                            Text(
-                                text = "Tahrirlash",
-                                color = themeRust,
-                                fontSize = 17.sp,
-                                fontWeight = FontWeight.SemiBold,
+                            Surface(
+                                color = themeRust.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(20.dp),
                                 modifier = Modifier.clickable { showEditModal = true }
-                            )
+                            ) {
+                                Text(
+                                    text = "Tahrirlash",
+                                    color = themeRust,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
                         
-                        // Premium Avatar Section
-                        Box(
-                            modifier = Modifier
-                                .size(100.dp)
-                                .background(themeRust.copy(alpha = 0.05f), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                user.name.take(1).uppercase(),
-                                fontSize = 42.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = themeRust
-                            )
+                        // Centered Profile Identity
+                        Box(contentAlignment = Alignment.BottomEnd) {
+                            Surface(
+                                modifier = Modifier.size(110.dp),
+                                shape = CircleShape,
+                                color = Color.White,
+                                shadowElevation = 8.dp
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(themeRust.copy(alpha = 0.05f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        user.name.take(1).uppercase(),
+                                        fontSize = 48.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = themeRust
+                                    )
+                                }
+                            }
+                            if (isVerified) {
+                                Surface(
+                                    color = Color(0xFF4CAF50),
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(28.dp),
+                                    border = BorderStroke(2.dp, Color.White)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Check, 
+                                        contentDescription = "Verified", 
+                                        tint = Color.White,
+                                        modifier = Modifier.padding(4.dp)
+                                    )
+                                }
+                            }
                         }
                         
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(user.name, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = themeText)
-                        Text(
-                            "GAP faol a'zosi", 
-                            color = Color(0xFF4CAF50), 
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
+                        Text(user.name, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = themeText)
                         
-                        Spacer(modifier = Modifier.height(48.dp))
+                        if (isVerified) {
+                            Surface(
+                                color = themeRust.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.padding(top = 8.dp)
+                            ) {
+                                Text(
+                                    "TASDIQLANGAN", 
+                                    color = themeRust, 
+                                    fontSize = 11.sp,
+                                    letterSpacing = 1.sp,
+                                    fontWeight = FontWeight.Black,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        // Stats Row
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 32.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            ProfileStatItem("Guruhlar", "12", themeRust)
+                            ProfileStatItem("Mablag'", "2.4M", themeRust)
+                            ProfileStatItem("Ball", "850", themeRust)
+                        }
+                        
+                        Spacer(modifier = Modifier.height(40.dp))
                         
                         // Info Grouped Card
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.7f)),
-                            shape = RoundedCornerShape(16.dp),
+                                .padding(horizontal = 24.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.6f)),
+                            shape = RoundedCornerShape(24.dp),
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                         ) {
                             Column {
-                                ProfileInfoRow(label = "Telefon raqam", value = user.phone, icon = Icons.Default.Phone)
+                                ProfileInfoRow(
+                                    label = "Telefon raqam", 
+                                    value = if (isVerified) user.phone else "Tasdiqlanmagan", 
+                                    icon = Icons.Default.Phone,
+                                    isWarning = !isVerified
+                                )
                                 HorizontalDivider(
-                                    modifier = Modifier.padding(start = 54.dp),
+                                    modifier = Modifier.padding(start = 64.dp, end = 16.dp),
                                     color = themeBeige,
                                     thickness = 1.dp
                                 )
-                                ProfileInfoRow(label = "A'zo ID", value = "#${user.id.takeLast(6).uppercase()}", icon = Icons.Default.ContactPage)
+                                ProfileInfoRow(
+                                    label = "A'zo ID", 
+                                    value = "#${user.id.takeLast(6).uppercase()}", 
+                                    icon = Icons.Default.ContactPage
+                                )
                             }
                         }
                         
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.weight(1f))
                         
-                        // Logout Row
-                        Card(
+                        // Logout Action
+                        TextButton(
+                            onClick = onLogout,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .clickable { onLogout() },
-                            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.7f)),
-                            shape = RoundedCornerShape(16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                .padding(24.dp)
+                                .height(56.dp),
+                            colors = ButtonDefaults.textButtonColors(contentColor = themeRed)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    "Tizimdan chiqish",
-                                    color = themeRed,
-                                    fontSize = 17.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                            Text(
+                                "Tizimdan chiqish",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
 
@@ -197,6 +255,24 @@ fun ProfileScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ProfileStatItem(label: String, value: String, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF424242)
+        )
+        Text(
+            text = label,
+            fontSize = 13.sp,
+            color = Color(0xFF757575),
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
@@ -288,9 +364,10 @@ fun EditProfileModal(
 }
 
 @Composable
-fun ProfileInfoRow(label: String, value: String, icon: ImageVector) {
+fun ProfileInfoRow(label: String, value: String, icon: ImageVector, isWarning: Boolean = false) {
     val themeRust = Color(0xFFB24F2C)
     val themeSecondaryText = Color(0xFF757575)
+    val themeRed = Color(0xFFD32F2F)
 
     Row(
         modifier = Modifier
@@ -309,6 +386,11 @@ fun ProfileInfoRow(label: String, value: String, icon: ImageVector) {
         Spacer(modifier = Modifier.width(16.dp))
         Text(label, fontSize = 16.sp, color = Color(0xFF424242), fontWeight = FontWeight.Medium)
         Spacer(modifier = Modifier.weight(1f))
-        Text(value, fontSize = 16.sp, color = themeSecondaryText)
+        Text(
+            value, 
+            fontSize = 15.sp, 
+            color = if (isWarning) themeRed else themeSecondaryText,
+            fontWeight = if (isWarning) FontWeight.Bold else FontWeight.Normal
+        )
     }
 }
