@@ -69,6 +69,6 @@ dependencies {
     // Coil (Image Loading)
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // Telegram Login
-    implementation("org.telegram:login-sdk:1.0.0")
+    // Browser support for Telegram Web Fallback
+    implementation("androidx.browser:browser:1.8.0")
 }

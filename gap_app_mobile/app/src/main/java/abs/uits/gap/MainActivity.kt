@@ -14,13 +14,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.LaunchedEffect
 import android.content.Intent
-import android.net.Uri
+import android.app.Activity
 import abs.uits.gap.ui.auth.AuthViewModel
 import abs.uits.gap.ui.auth.AuthViewModelFactory
 import abs.uits.gap.ui.auth.LoginScreen
 import abs.uits.gap.ui.auth.OtpScreen
-import abs.uits.gap.ui.group.GroupListScreen
 import abs.uits.gap.ui.theme.GapTheme
+import abs.uits.gap.core.telegram.TelegramLogin
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,19 +39,23 @@ class MainActivity : ComponentActivity() {
                     val startDestination = if (app.tokenStorage.getToken() != null) "groupList" else "login"
 
                     // Handle Telegram Login Redirect
-                    LaunchedEffect(Unit) {
-                        val intent = (context as? Activity)?.intent
-                        val data: Uri? = intent?.data
-                        if (data != null && data.host == "app8673065585-login.tg.dev") {
-                            val params = mutableMapOf<String, Any>()
-                            data.queryParameterNames.forEach { name ->
-                                val value = data.getQueryParameter(name)
-                                if (value != null) params[name] = value
-                            }
-                            if (params.containsKey("hash")) {
+                    LaunchedEffect(intent) {
+                        val telegramLogin = TelegramLogin.Builder("8673065585")
+                            .setOnLoginSuccess { data ->
+                                // Convert hash to params map for the existing ViewModel method
+                                val params = mutableMapOf<String, Any>()
+                                intent.data?.queryParameterNames?.forEach { name ->
+                                    val value = intent.data?.getQueryParameter(name)
+                                    if (value != null) params[name] = value
+                                }
                                 authViewModel.telegramLogin(params)
                             }
-                        }
+                            .setOnLoginError { error -> 
+                                // Optional: handle error UI
+                            }
+                            .build()
+                        
+                        telegramLogin.handleIntent(intent)
                     }
 
                     NavHost(navController = navController, startDestination = startDestination) {
@@ -106,7 +110,7 @@ class MainActivity : ComponentActivity() {
                             
                             val detailFactory = remember(groupId) { abs.uits.gap.ui.group.GroupDetailViewModelFactory(app.groupRepository, groupId) }
                             val detailViewModel: abs.uits.gap.ui.group.GroupDetailViewModel = viewModel(key = "groupDetail_$groupId", factory = detailFactory)
-
+                            
                             abs.uits.gap.ui.group.GroupDetailScreen(
                                 viewModel = detailViewModel,
                                 onBack = { navController.popBackStack() }
@@ -116,5 +120,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
 }

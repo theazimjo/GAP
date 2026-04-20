@@ -28,7 +28,7 @@ fun TelegramLoginButton(
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF54A9EB), // Telegram Blue
-            contentColor = Color.white
+            contentColor = Color.White
         ),
         enabled = !isLoading
     ) {

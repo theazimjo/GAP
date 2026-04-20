@@ -1,6 +1,5 @@
 package abs.uits.gap.ui.auth
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,10 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import abs.uits.gap.features.auth.presentation.components.TelegramLoginButton
-import android.net.Uri
-import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import android.app.Activity
+import abs.uits.gap.core.telegram.TelegramLogin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -177,12 +175,8 @@ fun LoginScreen(
             
             TelegramLoginButton(
                 onClick = {
-                    val botId = "8673065585"
-                    val redirectUrl = "https://app$botId-login.tg.dev/tglogin"
-                    val authUrl = "https://oauth.telegram.org/auth?bot_id=$botId&origin=$redirectUrl&embed=1"
-                    
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(authUrl))
-                    context.startActivity(intent)
+                    val telegramLogin = TelegramLogin.Builder("8673065585").build()
+                    telegramLogin.login(context as Activity)
                 },
                 isLoading = authState == AuthState.Loading
             )
