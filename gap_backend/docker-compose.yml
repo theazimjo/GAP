@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  gap-db:
+    image: postgres:15-alpine
+    container_name: gap-db
+    restart: always
+    environment:
+      POSTGRES_USER: gapuser
+      POSTGRES_PASSWORD: gappassword
+      POSTGRES_DB: gap_db
+    volumes:
+      - gap_db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  gap-backend:
+    build: .
+    container_name: gap-backend
+    restart: always
+    ports:
+      - "2030:2030"
+    environment:
+      DATABASE_URL: postgresql://gapuser:gappassword@gap-db:5432/gap_db?schema=public
+      JWT_SECRET: your_super_secret_key_here
+      PORT: 2030
+    depends_on:
+      - gap-db
+
+volumes:
+  gap_db_data:

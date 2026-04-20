@@ -1,48 +1,37 @@
-# ============================
-# Stage 1: Builder
-# ============================
-FROM node:20-bookworm-slim AS builder
+# Build stage
+FROM node:18-alpine AS builder
 
 WORKDIR /app
-
-# Install OpenSSL for Prisma
-RUN apt-get update -y && apt-get install -y openssl
 
 # Copy package files
 COPY package*.json ./
 
-# Copy Prisma schema
-COPY prisma ./prisma/
-
-# Install ALL dependencies (including devDependencies needed for typescript)
+# Install dependencies
 RUN npm install
 
-# Copy application code
+# Copy source code
 COPY . .
 
-# Generate Prisma client
-RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/db" npx prisma generate
-
-# Build TypeScript to the dist/ folder
+# Build the NestJS application
 RUN npm run build
 
-# ============================
-# Stage 2: Production Runner
-# ============================
-FROM node:20-bookworm-slim AS runner
+# Production stage
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Install OpenSSL for Prisma
-RUN apt-get update -y && apt-get install -y openssl
+# Copy production dependencies from package*.json
+COPY package*.json ./
+RUN npm install --only=production
 
-# Only copy necessary files from Builder
-COPY --from=builder /app/package*.json ./
+# Copy built assets from builder
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules ./node_modules
 
-EXPOSE 4000
+# Set default Environment variables
+ENV PORT=2030
+ENV NODE_ENV=production
 
-# The startup command is defined in docker-compose.yml to run migrations first
-CMD ["npm", "start"]
+EXPOSE 2030
+
+# Start the application
+CMD ["node", "dist/main.js"]

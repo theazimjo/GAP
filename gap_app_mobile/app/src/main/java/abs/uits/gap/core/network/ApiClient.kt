@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
     // DigitalOcean Production Server
-    private const val BASE_URL = "http://104.248.43.194:4000/api/"
+    private const val BASE_URL = "http://104.248.43.194:2030/api/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
