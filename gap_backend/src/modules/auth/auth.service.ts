@@ -61,7 +61,10 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired OTP');
     }
 
-    await this.usersService.update(user.id, { otpCode: null, otpExpiresAt: null });
+    await this.usersService.update(user.id, { 
+      otpCode: null as any, 
+      otpExpiresAt: null as any 
+    });
     
     const token = this.jwtService.sign({ userId: user.id });
     return { token, user: { id: user.id, name: user.name, phone: user.phone } };
