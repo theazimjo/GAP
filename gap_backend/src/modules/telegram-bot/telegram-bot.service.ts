@@ -37,9 +37,8 @@ export class TelegramBotService implements OnModuleInit {
         // Authenticate user and get token
         const result = await this.authService.loginByTelegramId(id, first_name, last_name);
         
-        // Create Deep Link for App
-        // Example: abs.uits.gap://login?token=xyz
-        const loginUrl = `abs.uits.gap://login?token=${result.token}`;
+        // Create Redirect Link for App (to bypass Telegram protocol restriction)
+        const loginUrl = `http://104.248.43.194:2030/api/auth/callback?token=${result.token}`;
 
         await ctx.reply(
           `Salom ${first_name}! GAP ilovasiga xush kelibsiz.`,
