@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
 
                     // Handle Telegram Login Redirect
                     LaunchedEffect(intent) {
-                        val telegramLogin = TelegramLogin.Builder("8673065585")
+                        val telegramLogin = TelegramLogin.Builder("8753402796")
                             .setOnLoginSuccess { data ->
                                 // Convert hash to params map for the existing ViewModel method
                                 val params = mutableMapOf<String, Any>()

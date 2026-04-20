@@ -28,11 +28,11 @@
             </intent-filter>
 
             <!-- Telegram Login Callback -->
-            <intent-filter android:autoVerify="true">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="app8673065585-login.tg.dev" android:path="/tglogin" />
+                <data android:scheme="abs.uits.gap" android:host="telegram-auth" />
             </intent-filter>
         </activity>
     </application>

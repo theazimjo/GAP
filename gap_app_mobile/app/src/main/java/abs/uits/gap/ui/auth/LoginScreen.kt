@@ -175,7 +175,7 @@ fun LoginScreen(
             
             TelegramLoginButton(
                 onClick = {
-                    val telegramLogin = TelegramLogin.Builder("8673065585").build()
+                    val telegramLogin = TelegramLogin.Builder("8753402796").build()
                     telegramLogin.login(context as Activity)
                 },
                 isLoading = authState == AuthState.Loading
