@@ -21,8 +21,16 @@ cd gap_backend
 
 # 4. Docker konteynerlarni qayta qurish va yurgizish
 echo "🐳 Docker konteynerlar yangilanmoqda..."
-docker-compose down
-docker-compose up -d --build
+
+# Docker compose buyrug'ini tekshirish (yangi format yoki eski format)
+if docker compose version > /dev/null 2>&1; then
+    DOCKER_CONFIG_CMD="docker compose"
+else
+    DOCKER_CONFIG_CMD="docker-compose"
+fi
+
+$DOCKER_CONFIG_CMD down
+$DOCKER_CONFIG_CMD up -d --build
 
 # 5. Keraksiz Docker image'larni tozalash
 echo "🧹 Eski Docker image'lar tozalanmoqda..."
