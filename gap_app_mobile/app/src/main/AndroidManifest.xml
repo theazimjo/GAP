@@ -27,12 +27,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Telegram Login Callback -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="abs.uits.gap" android:host="telegram-auth" />
+                <data android:scheme="abs.uits.gap" android:host="login" />
             </intent-filter>
         </activity>
     </application>

@@ -38,7 +38,7 @@ class TelegramLogin private constructor(
             .appendQueryParameter("origin", "https://gapuz.duckdns.org")
             .appendQueryParameter("embed", "1")
             .appendQueryParameter("request_access", "write")
-            .appendQueryParameter("return_to", "abs.uits.gap://telegram-auth")
+            .appendQueryParameter("return_to", "https://gapuz.duckdns.org/tglogin")
             .build()
 
         val intent = Intent(Intent.ACTION_VIEW, uri)

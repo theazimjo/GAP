@@ -16,6 +16,7 @@ const groups_module_1 = require("./modules/groups/groups.module");
 const turns_module_1 = require("./modules/turns/turns.module");
 const payments_module_1 = require("./modules/payments/payments.module");
 const common_module_1 = require("./modules/common/common.module");
+const telegram_bot_module_1 = require("./modules/telegram-bot/telegram-bot.module");
 // Entities
 const user_entity_1 = require("./entities/user.entity");
 const group_entity_1 = require("./entities/group.entity");
@@ -41,6 +42,7 @@ exports.AppModule = AppModule = __decorate([
             turns_module_1.TurnsModule,
             payments_module_1.PaymentsModule,
             common_module_1.CommonModule,
+            telegram_bot_module_1.TelegramBotModule,
         ],
     })
 ], AppModule);

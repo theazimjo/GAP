@@ -4,6 +4,7 @@ export declare class UsersService {
     private usersRepository;
     constructor(usersRepository: Repository<User>);
     findByPhone(phone: string): Promise<User | null>;
+    findByTelegramId(telegramId: string): Promise<User | null>;
     findById(id: number): Promise<User | null>;
     create(data: Partial<User>): Promise<User>;
     update(id: number, data: Partial<User>): Promise<User>;

@@ -17,6 +17,9 @@ export class User {
   @Column({ unique: true, nullable: true })
   email: string;
 
+  @Column({ unique: true, nullable: true })
+  telegramId: string;
+
   @Column()
   passwordHash: string;
 

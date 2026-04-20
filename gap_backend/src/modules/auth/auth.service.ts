@@ -71,6 +71,26 @@ export class AuthService {
     return { token, user: { id: user.id, name: user.name, phone: user.phone } };
   }
 
+  async loginByTelegramId(id: number, first_name: string, last_name?: string) {
+    const telegramId = id.toString();
+    const name = last_name ? `${first_name} ${last_name}` : first_name;
+
+    let user = await this.usersService.findByTelegramId(telegramId);
+    
+    if (!user) {
+      // Create user if not exists
+      user = await this.usersService.create({
+        name,
+        telegramId,
+        phone: `tg_${telegramId}`, // Fallback phone string
+        passwordHash: '',
+      });
+    }
+
+    const token = this.jwtService.sign({ userId: user.id });
+    return { token, user: { id: user.id, name: user.name, phone: user.phone } };
+  }
+
   async telegramLogin(telegramData: any) {
     const isValid = this.verifyTelegramHash(telegramData);
     if (!isValid) {

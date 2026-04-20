@@ -25,6 +25,9 @@ let UsersService = class UsersService {
     async findByPhone(phone) {
         return this.usersRepository.findOne({ where: { phone } });
     }
+    async findByTelegramId(telegramId) {
+        return this.usersRepository.findOne({ where: { telegramId } });
+    }
     async findById(id) {
         return this.usersRepository.findOne({ where: { id } });
     }

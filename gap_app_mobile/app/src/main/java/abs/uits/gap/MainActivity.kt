@@ -13,10 +13,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import android.content.Intent
 import android.app.Activity
 import abs.uits.gap.ui.auth.AuthViewModel
 import abs.uits.gap.ui.auth.AuthViewModelFactory
+import abs.uits.gap.ui.auth.AuthState
 import abs.uits.gap.ui.auth.LoginScreen
 import abs.uits.gap.ui.auth.OtpScreen
 import abs.uits.gap.ui.theme.GapTheme
@@ -38,24 +40,35 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val startDestination = if (app.tokenStorage.getToken() != null) "groupList" else "login"
 
-                    // Handle Telegram Login Redirect
+                    // Handle Deep Link Redirects (Bot or OAuth)
                     LaunchedEffect(intent) {
-                        val telegramLogin = TelegramLogin.Builder("8753402796")
-                            .setOnLoginSuccess { data ->
-                                // Convert hash to params map for the existing ViewModel method
+                        val data = intent.data
+                        if (data != null && data.scheme == "abs.uits.gap") {
+                            val token = data.getQueryParameter("token")
+                            if (token != null) {
+                                authViewModel.loginWithToken(token)
+                                intent.data = null // Clear to prevent re-processing
+                            } else {
                                 val params = mutableMapOf<String, Any>()
-                                intent.data?.queryParameterNames?.forEach { name ->
-                                    val value = intent.data?.getQueryParameter(name)
+                                data.queryParameterNames.forEach { name ->
+                                    val value = data.getQueryParameter(name)
                                     if (value != null) params[name] = value
                                 }
-                                authViewModel.telegramLogin(params)
+                                if (params.containsKey("hash")) {
+                                    authViewModel.telegramLogin(params)
+                                    intent.data = null
+                                }
                             }
-                            .setOnLoginError { error -> 
-                                // Optional: handle error UI
+                        }
+                    }
+
+                    // Navigate on Success
+                    LaunchedEffect(authViewModel.authState.collectAsState().value) {
+                        if (authViewModel.authState.value is AuthState.Success) {
+                            navController.navigate("groupList") {
+                                popUpTo("login") { inclusive = true }
                             }
-                            .build()
-                        
-                        telegramLogin.handleIntent(intent)
+                        }
                     }
 
                     NavHost(navController = navController, startDestination = startDestination) {

@@ -7,6 +7,7 @@ import { GroupsModule } from './modules/groups/groups.module';
 import { TurnsModule } from './modules/turns/turns.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { CommonModule } from './modules/common/common.module';
+import { TelegramBotModule } from './modules/telegram-bot/telegram-bot.module';
 
 // Entities
 import { User } from './entities/user.entity';
@@ -30,6 +31,7 @@ import { Payment } from './entities/payment.entity';
     TurnsModule,
     PaymentsModule,
     CommonModule,
+    TelegramBotModule,
   ],
 })
 export class AppModule {}

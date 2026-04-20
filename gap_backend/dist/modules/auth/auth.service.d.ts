@@ -34,6 +34,14 @@ export declare class AuthService {
             phone: string;
         };
     }>;
+    loginByTelegramId(id: number, first_name: string, last_name?: string): Promise<{
+        token: string;
+        user: {
+            id: number;
+            name: string;
+            phone: string;
+        };
+    }>;
     telegramLogin(telegramData: any): Promise<{
         token: string;
         user: {

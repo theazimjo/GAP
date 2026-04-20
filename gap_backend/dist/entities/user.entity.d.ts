@@ -6,6 +6,7 @@ export declare class User {
     name: string;
     phone: string;
     email: string;
+    telegramId: string;
     passwordHash: string;
     avatarUrl: string;
     otpCode: string;

@@ -16,6 +16,8 @@ import kotlinx.coroutines.launch
 import abs.uits.gap.features.auth.presentation.components.TelegramLoginButton
 import androidx.compose.ui.platform.LocalContext
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import abs.uits.gap.core.telegram.TelegramLogin
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -175,8 +177,9 @@ fun LoginScreen(
             
             TelegramLoginButton(
                 onClick = {
-                    val telegramLogin = TelegramLogin.Builder("8753402796").build()
-                    telegramLogin.login(context as Activity)
+                    val botUsername = "gap_sign_bot"
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$botUsername?start=login"))
+                    context.startActivity(intent)
                 },
                 isLoading = authState == AuthState.Loading
             )

@@ -72,6 +72,11 @@ class AuthViewModel(
             }
         }
     }
+
+    fun loginWithToken(token: String) {
+        tokenStorage.saveToken(token)
+        _authState.value = AuthState.Success
+    }
     
     fun resetState() {
         _authState.value = AuthState.Idle

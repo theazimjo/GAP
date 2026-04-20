@@ -14,6 +14,10 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { phone } });
   }
 
+  async findByTelegramId(telegramId: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { telegramId } });
+  }
+
   async findById(id: number): Promise<User | null> {
     return this.usersRepository.findOne({ where: { id } });
   }
