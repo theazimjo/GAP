@@ -56,7 +56,9 @@ fun OtpScreen(
         if (isGranted) {
             try {
                 val smsManager = SmsManager.getDefault()
-                smsManager.sendTextMessage("+998$phone", null, "GAP tasdiqlash kodi: $otpCode", null, null)
+                // phone already starts with 998, just add "+"
+                val destPhone = if (phone.startsWith("+")) phone else "+$phone"
+                smsManager.sendTextMessage(destPhone, null, "GAP tasdiqlash kodi: $otpCode", null, null)
                 Toast.makeText(context, "SMS yuborildi!", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {}
         }
@@ -118,7 +120,7 @@ fun OtpScreen(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                "Biz +998 $phone raqamiga\n6 xonali tasdiqlash kodini yubordik",
+                "Biz ${formatPhoneNumber(phone)} raqamiga\n6 xonali tasdiqlash kodini yubordik",
                 fontSize = 17.sp,
                 color = iosGray,
                 textAlign = TextAlign.Center,
@@ -169,7 +171,7 @@ fun OtpScreen(
             Button(
                 onClick = {
                     if (codeInput.length == 6) {
-                        viewModel.verifyOtp("+998$phone", codeInput)
+                        viewModel.verifyOtp(phone, codeInput)
                     }
                 },
                 modifier = Modifier
@@ -220,5 +222,14 @@ fun OtpScreen(
                 )
             }
         }
+    }
+}
+
+fun formatPhoneNumber(phone: String): String {
+    val cleaned = phone.replace(Regex("[^0-9]"), "")
+    return if (cleaned.length == 12 && cleaned.startsWith("998")) {
+        "+998 ${cleaned.substring(3, 5)} ${cleaned.substring(5, 8)} ${cleaned.substring(8, 10)} ${cleaned.substring(10, 12)}"
+    } else {
+        if (phone.startsWith("+")) phone else "+$phone"
     }
 }

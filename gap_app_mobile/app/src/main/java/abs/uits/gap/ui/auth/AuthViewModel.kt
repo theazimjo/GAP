@@ -30,12 +30,12 @@ class AuthViewModel(
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             
-            // Format phone logic similar to Flutter app
-            var smsPhone = phone.replace(Regex("[^0-9]"), "")
-            if (!smsPhone.startsWith("998") && smsPhone.length == 9) {
-                smsPhone = "998$smsPhone"
-            } else if (!smsPhone.startsWith("998")) {
-                smsPhone = "998$smsPhone"
+            // Format phone logic: ensure 998 prefix exactly once
+            var cleaned = phone.replace(Regex("[^0-9]"), "")
+            val smsPhone = when {
+                cleaned.length == 9 -> "998$cleaned"
+                cleaned.length == 12 && cleaned.startsWith("998") -> cleaned
+                else -> cleaned // Fallback for other formats
             }
 
             val result = repository.requestOtp(smsPhone)
