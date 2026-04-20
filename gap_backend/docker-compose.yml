@@ -22,7 +22,8 @@ services:
       - "2030:2030"
     environment:
       DATABASE_URL: postgresql://gapuser:gappassword@gap-db:5432/gap_db?schema=public
-      JWT_SECRET: your_super_secret_key_here
+      JWT_SECRET: gap_secret_key_2024
+      TELEGRAM_BOT_TOKEN: 8753402796:AAHktK0cYa-753u9xtMML2Fqpsf30Qwpx-0
       PORT: 2030
     depends_on:
       - gap-db
