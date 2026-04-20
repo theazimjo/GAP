@@ -20,7 +20,7 @@ import { Payment } from './entities/payment.entity';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL,
+      url: process.env.DATABASE_URL as string,
       entities: [User, Group, Membership, Turn, Payment],
       synchronize: true, // Should be false in production
     }),
