@@ -1,0 +1,10 @@
+export declare class TelegramAuthDto {
+    id: number;
+    first_name: string;
+    last_name?: string;
+    username?: string;
+    photo_url?: string;
+    auth_date: number;
+    hash: string;
+}
+//# sourceMappingURL=telegram-auth.dto.d.ts.map

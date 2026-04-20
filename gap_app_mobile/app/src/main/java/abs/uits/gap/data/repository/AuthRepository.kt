@@ -31,6 +31,19 @@ class AuthRepository(private val apiService: ApiService) {
         }
     }
 
+    suspend fun telegramLogin(data: Map<String, Any>): Result<AuthResponse> {
+        return try {
+            val response = apiService.telegramLogin(data)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Telegram login failed: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getMe(): Result<abs.uits.gap.core.network.ProfileDto> {
         return try {
             val response = apiService.getMe()

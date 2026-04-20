@@ -12,6 +12,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.LaunchedEffect
+import android.content.Intent
+import android.net.Uri
 import abs.uits.gap.ui.auth.AuthViewModel
 import abs.uits.gap.ui.auth.AuthViewModelFactory
 import abs.uits.gap.ui.auth.LoginScreen
@@ -34,6 +37,22 @@ class MainActivity : ComponentActivity() {
 
                     val navController = rememberNavController()
                     val startDestination = if (app.tokenStorage.getToken() != null) "groupList" else "login"
+
+                    // Handle Telegram Login Redirect
+                    LaunchedEffect(Unit) {
+                        val intent = (context as? Activity)?.intent
+                        val data: Uri? = intent?.data
+                        if (data != null && data.host == "app8673065585-login.tg.dev") {
+                            val params = mutableMapOf<String, Any>()
+                            data.queryParameterNames.forEach { name ->
+                                val value = data.getQueryParameter(name)
+                                if (value != null) params[name] = value
+                            }
+                            if (params.containsKey("hash")) {
+                                authViewModel.telegramLogin(params)
+                            }
+                        }
+                    }
 
                     NavHost(navController = navController, startDestination = startDestination) {
                         composable("login") {

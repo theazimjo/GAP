@@ -14,6 +14,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import abs.uits.gap.features.auth.presentation.components.TelegramLoginButton
+import android.net.Uri
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
+import android.app.Activity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,6 +30,7 @@ fun LoginScreen(
     val authState by viewModel.authState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // iOS System Colors
     val iosBlue = Color(0xFF007AFF)
@@ -148,6 +154,38 @@ fun LoginScreen(
                     Text("Davom etish", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                 }
             }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // OR Divider
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFC6C6C8), thickness = 0.5.dp)
+                Text(
+                    "YOKI",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontSize = 12.sp,
+                    color = Color(0xFF8E8E93),
+                    fontWeight = FontWeight.Medium
+                )
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFC6C6C8), thickness = 0.5.dp)
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            TelegramLoginButton(
+                onClick = {
+                    val botId = "8673065585"
+                    val redirectUrl = "https://app$botId-login.tg.dev/tglogin"
+                    val authUrl = "https://oauth.telegram.org/auth?bot_id=$botId&origin=$redirectUrl&embed=1"
+                    
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(authUrl))
+                    context.startActivity(intent)
+                },
+                isLoading = authState == AuthState.Loading
+            )
             
             Spacer(modifier = Modifier.weight(1f))
             

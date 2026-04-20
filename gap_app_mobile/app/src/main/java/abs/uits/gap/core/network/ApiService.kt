@@ -20,6 +20,9 @@ interface ApiService {
     @POST("auth/verify-otp")
     suspend fun verifyOtp(@Body body: Map<String, String>): Response<AuthResponse>
 
+    @POST("auth/telegram")
+    suspend fun telegramLogin(@Body body: Map<String, Any>): Response<AuthResponse>
+
     @GET("auth/me")
     suspend fun getMe(): Response<ProfileDto>
 

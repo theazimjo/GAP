@@ -68,4 +68,7 @@ dependencies {
 
     // Coil (Image Loading)
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // Telegram Login
+    implementation("org.telegram:login-sdk:1.0.0")
 }

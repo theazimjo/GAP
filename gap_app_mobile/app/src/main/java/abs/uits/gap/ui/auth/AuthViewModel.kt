@@ -59,6 +59,19 @@ class AuthViewModel(
             }
         }
     }
+
+    fun telegramLogin(data: Map<String, Any>) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            val result = repository.telegramLogin(data)
+            result.onSuccess { response ->
+                tokenStorage.saveToken(response.token)
+                _authState.value = AuthState.Success
+            }.onFailure { error ->
+                _authState.value = AuthState.Error(error.message ?: "Noma'lum xatolik")
+            }
+        }
+    }
     
     fun resetState() {
         _authState.value = AuthState.Idle
