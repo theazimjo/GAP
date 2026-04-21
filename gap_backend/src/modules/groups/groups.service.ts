@@ -48,11 +48,27 @@ export class GroupsService {
   }
 
   async getGroups(userId: number) {
-    return this.groupsRepository
-      .createQueryBuilder('group')
-      .innerJoin('group.members', 'membership')
-      .where('membership.userId = :userId', { userId })
-      .getMany();
+    const groups = await this.groupsRepository.find({
+      where: {
+        members: { userId },
+      },
+      relations: ['creator'],
+    });
+
+    // Map to include member count in the format frontend expects (_count.members)
+    return Promise.all(
+      groups.map(async (group) => {
+        const memberCount = await this.membershipRepository.count({
+          where: { groupId: group.id },
+        });
+        return {
+          ...group,
+          _count: {
+            members: memberCount,
+          },
+        };
+      }),
+    );
   }
 
   async getGroupDetail(groupId: number) {

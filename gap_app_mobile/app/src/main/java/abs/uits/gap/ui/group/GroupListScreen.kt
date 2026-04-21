@@ -195,7 +195,7 @@ fun GroupItem(group: GroupDto, onClick: () -> Unit) {
                 color = Color(0xFF424242)
             )
             Text(
-                "Tashkilotchi: ${group.creator.name}",
+                "Tashkilotchi: ${group.creator?.name ?: "Noma'lum"}",
                 fontSize = 13.sp,
                 color = themeSecondaryText
             )
@@ -203,7 +203,7 @@ fun GroupItem(group: GroupDto, onClick: () -> Unit) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "${group._count.members}",
+                "${group._count?.members ?: 0}",
                 color = themeSecondaryText,
                 fontSize = 15.sp
             )

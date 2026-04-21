@@ -1,8 +1,6 @@
 package abs.uits.gap.ui.main
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -31,6 +29,8 @@ fun MainContainer(
     val profileViewModel: ProfileViewModel = viewModel(factory = profileFactory)
 
     var selectedItem by remember { mutableIntStateOf(0) }
+    var isBottomBarVisible by remember { mutableStateOf(true) }
+
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Groups,
@@ -45,43 +45,48 @@ fun MainContainer(
 
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = themeBeige,
-                tonalElevation = 0.dp // Flat premium look
-            ) {
-                items.forEachIndexed { index, item ->
-                    val isSelected = selectedItem == index
-                    NavigationBarItem(
-                        icon = { 
-                            Icon(
-                                item.icon, 
-                                contentDescription = item.title,
-                                modifier = Modifier.size(26.dp)
-                            ) 
-                        },
-                        label = { 
-                            Text(
-                                item.title, 
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                            ) 
-                        },
-                        selected = isSelected,
-                        onClick = { selectedItem = index },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = themeRust,
-                            selectedTextColor = themeRust,
-                            unselectedIconColor = themeInactive,
-                            unselectedTextColor = themeInactive,
-                            indicatorColor = Color.Transparent
+            if (isBottomBarVisible) {
+                NavigationBar(
+                    containerColor = themeBeige,
+                    tonalElevation = 0.dp // Flat premium look
+                ) {
+                    items.forEachIndexed { index, item ->
+                        val isSelected = selectedItem == index
+                        NavigationBarItem(
+                            icon = { 
+                                Icon(
+                                    item.icon, 
+                                    contentDescription = item.title,
+                                    modifier = Modifier.size(26.dp)
+                                ) 
+                            },
+                            label = { 
+                                Text(
+                                    item.title, 
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                ) 
+                            },
+                            selected = isSelected,
+                            onClick = { 
+                                selectedItem = index
+                                isBottomBarVisible = true 
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = themeRust,
+                                selectedTextColor = themeRust,
+                                unselectedIconColor = themeInactive,
+                                unselectedTextColor = themeInactive,
+                                indicatorColor = Color.Transparent
+                            )
                         )
-                    )
+                    }
                 }
             }
         },
         containerColor = themeBeige
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Box(modifier = Modifier.fillMaxSize().padding(if (isBottomBarVisible) padding else PaddingValues(0.dp))) {
             when (selectedItem) {
                 0 -> PlaceholderScreen(
                     title = "Xush kelibsiz",
@@ -95,7 +100,13 @@ fun MainContainer(
                 )
                 2 -> CreateScreen(
                     viewModel = groupViewModel,
-                    onNavigateBack = { selectedItem = 1 } // Go back to Groups after creation
+                    onNavigateBack = { 
+                        selectedItem = 1
+                        isBottomBarVisible = true
+                    },
+                    onViewChange = { view ->
+                        isBottomBarVisible = view == "selection"
+                    }
                 )
                 3 -> ProfileScreen(
                     viewModel = profileViewModel,

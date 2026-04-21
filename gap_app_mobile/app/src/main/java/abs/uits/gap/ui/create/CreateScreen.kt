@@ -1,25 +1,32 @@
 package abs.uits.gap.ui.create
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -28,20 +35,36 @@ import androidx.compose.ui.unit.sp
 import abs.uits.gap.ui.group.GroupViewModel
 import abs.uits.gap.ui.group.CreateGroupState
 
+// Core Colors
+val ThemeRust = Color(0xFFB24F2C)
+val IosGrayBackground = Color(0xFFF2F2F7)
+val IosLabelGray = Color(0xFF8E8E93)
+val IosDividerColor = Color(0xFFC6C6C8)
+
 @Composable
 fun CreateScreen(
     viewModel: GroupViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onViewChange: (String) -> Unit = {}
 ) {
-    var currentView by remember { mutableStateOf("selection") } // "selection" or "create" or "join"
+    var currentView by remember { mutableStateOf("selection") }
     
-    val themeBeige = Color(0xFFF2EEE4)
+    LaunchedEffect(currentView) {
+        onViewChange(currentView)
+    }
 
-    Box(modifier = Modifier.fillMaxSize().background(themeBeige)) {
+    Box(modifier = Modifier.fillMaxSize().background(IosGrayBackground)) {
         AnimatedContent(
             targetState = currentView,
             transitionSpec = {
-                fadeIn() togetherWith fadeOut()
+                val enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(400, easing = FastOutSlowInEasing)) + fadeIn()
+                val exit = fadeOut() + slideOutVertically(targetOffsetY = { it }, animationSpec = tween(300))
+                
+                if (targetState != "selection") {
+                    enter togetherWith exit
+                } else {
+                    fadeIn() togetherWith exit
+                }
             },
             label = "CreateFlowTransition"
         ) { view ->
@@ -64,76 +87,173 @@ fun CreateScreen(
 }
 
 @Composable
-fun SelectionView(onCreateSelected: () -> Unit, onJoinSelected: () -> Unit) {
-    val themeRust = Color(0xFFB24F2C)
-    
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            "GAP boshlang",
-            fontSize = 32.sp,
-            fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF424242)
-        )
-        Spacer(modifier = Modifier.height(48.dp))
-        
-        SelectionCard(
-            title = "Guruh Yaratish",
-            description = "O'zingizning yangi GAP guruhingizni shakllantiring va do'stlaringizni taklif qiling.",
-            icon = Icons.Default.AddCircle,
-            onClick = onCreateSelected,
-            color = themeRust
-        )
-        
-        Spacer(modifier = Modifier.height(20.dp))
-        
-        SelectionCard(
-            title = "Guruhga Qo'shilish",
-            description = "Mavjud guruhga ID yoki QR-kod orqali a'zo bo'ling.",
-            icon = Icons.Default.GroupAdd,
-            onClick = onJoinSelected,
-            color = Color(0xFF424242)
-        )
-    }
-}
-
-@Composable
-fun SelectionCard(title: String, description: String, icon: ImageVector, onClick: () -> Unit, color: Color) {
+private fun IosTopBar(
+    title: String,
+    leftAction: String? = null,
+    onLeftClick: () -> Unit = {},
+    rightAction: String? = null,
+    onRightClick: () -> Unit = {},
+    isLoading: Boolean = false
+) {
     Surface(
-        modifier = Modifier.fillMaxWidth().clickable { onClick() },
-        shape = RoundedCornerShape(24.dp),
-        color = Color.White,
-        shadowElevation = 2.dp
+        modifier = Modifier.fillMaxWidth().height(52.dp),
+        color = Color.White.copy(alpha = 0.98f),
+        border = BorderStroke(0.3.dp, IosDividerColor.copy(alpha = 0.5f))
     ) {
-        Row(
-            modifier = Modifier.padding(24.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = color.copy(alpha = 0.1f)
-            ) {
-                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.padding(12.dp))
+        Box(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)) {
+            if (leftAction != null) {
+                Text(
+                    text = leftAction,
+                    color = ThemeRust,
+                    fontSize = 17.sp,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(horizontal = 8.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onLeftClick
+                        )
+                )
             }
-            Spacer(modifier = Modifier.width(20.dp))
-            Column {
-                Text(title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF424242))
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(description, fontSize = 14.sp, color = Color(0xFF757575))
+            
+            Text(
+                title,
+                modifier = Modifier.align(Alignment.Center),
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black
+            )
+            
+            if (rightAction != null) {
+                Text(
+                    text = rightAction,
+                    color = if (isLoading) ThemeRust.copy(alpha = 0.5f) else ThemeRust,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(horizontal = 8.dp)
+                        .clickable(
+                            enabled = !isLoading,
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onRightClick
+                        )
+                )
             }
         }
     }
 }
 
 @Composable
-fun CreateFormView(viewModel: GroupViewModel, onBack: () -> Unit, onCreated: () -> Unit) {
-    val themeRust = Color(0xFFB24F2C)
-    val themeSecondaryText = Color(0xFF757575)
+private fun IosSection(title: String? = null, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+        if (title != null) {
+            Text(
+                title.uppercase(),
+                modifier = Modifier.padding(start = 28.dp, bottom = 6.dp),
+                fontSize = 12.sp,
+                color = IosLabelGray,
+                fontWeight = FontWeight.Normal,
+                letterSpacing = 0.5.sp
+            )
+        }
+        Surface(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(10.dp),
+            color = Color.White
+        ) {
+            Column(content = content)
+        }
+    }
+}
+
+@Composable
+private fun IosRow(
+    icon: ImageVector? = null,
+    iconColor: Color = Color.Gray,
+    title: String,
+    subtitle: String? = null,
+    showChevron: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    content: @Composable (() -> Unit)? = null
+) {
+    var modifier = Modifier.fillMaxWidth().heightIn(min = 44.dp)
+    if (onClick != null) modifier = modifier.clickable { onClick() }
+
+    Row(
+        modifier = modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (icon != null) {
+            Surface(
+                modifier = Modifier.size(29.dp),
+                shape = RoundedCornerShape(7.dp),
+                color = iconColor
+            ) {
+                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.padding(5.dp))
+            }
+            Spacer(modifier = Modifier.width(15.dp))
+        }
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontSize = 17.sp, color = Color.Black)
+            if (subtitle != null) {
+                Text(subtitle, fontSize = 12.sp, color = IosLabelGray)
+            }
+        }
+        
+        content?.invoke()
+        
+        if (showChevron) {
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = IosDividerColor,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun SelectionView(onCreateSelected: () -> Unit, onJoinSelected: () -> Unit) {
+    Column(modifier = Modifier.fillMaxSize().padding(top = 80.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().padding(bottom = 40.dp), contentAlignment = Alignment.Center) {
+            Text(
+                "GAP",
+                fontSize = 42.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.Black,
+                letterSpacing = (-2).sp
+            )
+        }
+
+        IosSection(title = "Boshlash") {
+            IosRow(
+                icon = Icons.Default.Add,
+                iconColor = Color(0xFF34C759),
+                title = "Guruh Yaratish",
+                subtitle = "Yangi guruhni boshqarish",
+                showChevron = true,
+                onClick = onCreateSelected
+            )
+            HorizontalDivider(modifier = Modifier.padding(start = 60.dp), thickness = 0.5.dp, color = IosDividerColor)
+            IosRow(
+                icon = Icons.Default.GroupAdd,
+                iconColor = ThemeRust,
+                title = "Guruhga Qo'shilish",
+                subtitle = "Kod orqali a'zo bo'lish",
+                showChevron = true,
+                onClick = onJoinSelected
+            )
+        }
+    }
+}
+
+@Composable
+private fun CreateFormView(viewModel: GroupViewModel, onBack: () -> Unit, onCreated: () -> Unit) {
     val createState by viewModel.createState.collectAsState()
     
     var name by remember { mutableStateOf("") }
@@ -141,9 +261,10 @@ fun CreateFormView(viewModel: GroupViewModel, onBack: () -> Unit, onCreated: () 
     var selectedEmoji by remember { mutableStateOf("🤝") }
     var isOptionalAmount by remember { mutableStateOf(false) }
     var amount by remember { mutableStateOf("500000") }
-    var meetingDays by remember { mutableStateOf("10,25") }
+    var meetingDays by remember { mutableStateOf("10, 25") }
+    var selectionMethod by remember { mutableStateOf("random") }
     
-    val emojis = listOf("🤝", "💰", "🏠", "🎓", "🚗", "✈️", "👨‍👩‍👧‍👦", "🎉", "💎", "🌙")
+    val emojis = remember { listOf("🤝", "💰", "🏠", "🎓", "🚗", "✈️", "👨‍👩", "🎉", "🔥", "🌈", "🍎", "🏀", "⚽", "🎮", "🎸", "📚") }
 
     LaunchedEffect(createState) {
         if (createState is CreateGroupState.Success) {
@@ -152,245 +273,222 @@ fun CreateFormView(viewModel: GroupViewModel, onBack: () -> Unit, onCreated: () 
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-            }
-            Text(
-                "Guruh Yaratish",
-                fontSize = 28.sp,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF424242),
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text("Emoji", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            emojis.forEach { emoji ->
-                EmojiItem(
-                    emoji = emoji,
-                    isSelected = selectedEmoji == emoji,
-                    onClick = { selectedEmoji = emoji }
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        PremiumTextField(value = name, onValueChange = { name = it }, placeholder = "Guruh nomi")
-        Spacer(modifier = Modifier.height(16.dp))
-        PremiumTextField(value = description, onValueChange = { description = it }, placeholder = "Tavsif")
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            color = Color.White
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Ixtiyoriy miqdor", fontWeight = FontWeight.Medium)
-                Switch(
-                    checked = isOptionalAmount,
-                    onCheckedChange = { isOptionalAmount = it },
-                    colors = SwitchDefaults.colors(checkedThumbColor = themeRust, checkedTrackColor = themeRust.copy(alpha = 0.3f))
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text("Tavsiya etilgan miqdor (so'm)", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        Spacer(modifier = Modifier.height(8.dp))
-        PremiumTextField(
-            value = amount, 
-            onValueChange = { amount = it }, 
-            placeholder = "500000",
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-        Text(
-            "A'zolar boshqa miqdor ham belgilashi mumkin",
-            fontSize = 12.sp,
-            color = themeSecondaryText,
-            modifier = Modifier.padding(top = 8.dp, start = 4.dp)
-        )
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text("Yig'ilish kunlari (1-31)", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        Spacer(modifier = Modifier.height(8.dp))
-        PremiumTextField(value = meetingDays, onValueChange = { meetingDays = it }, placeholder = "10,25")
-        Text(
-            "Comma-separated days of month",
-            fontSize = 12.sp,
-            color = themeSecondaryText,
-            modifier = Modifier.padding(top = 8.dp, start = 4.dp)
-        )
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text("Tanlash usuli", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        Spacer(modifier = Modifier.height(8.dp))
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            color = Color.White
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("🎲 Tasodifiy tanlov", color = Color(0xFF424242))
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(40.dp))
-        
-        Button(
-            onClick = {
+    Column(modifier = Modifier.fillMaxSize()) {
+        IosTopBar(
+            title = "Yangi guruh",
+            leftAction = "Bekor qilish",
+            onLeftClick = onBack,
+            rightAction = "Yaratish",
+            onRightClick = {
                 viewModel.createGroup(
                     name = name,
                     emoji = selectedEmoji,
                     description = description,
                     isAmountOptional = isOptionalAmount,
-                    contributionAmount = amount.toDoubleOrNull() ?: 0.0,
-                    meetingDays = meetingDays
+                    contributionAmount = if (isOptionalAmount) 0.0 else (amount.toDoubleOrNull() ?: 0.0),
+                    meetingDays = meetingDays,
+                    selectionMethod = selectionMethod
                 )
             },
-            modifier = Modifier.fillMaxWidth().height(60.dp),
-            shape = RoundedCornerShape(30.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = themeRust),
-            enabled = name.isNotBlank() && createState !is CreateGroupState.Loading
+            isLoading = createState is CreateGroupState.Loading
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = 20.dp)
         ) {
-            if (createState is CreateGroupState.Loading) {
-                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-            } else {
-                Text("Guruh Yaratish", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            IosSection {
+                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+                    Surface(
+                        modifier = Modifier.size(86.dp),
+                        shape = CircleShape,
+                        color = IosGrayBackground
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(selectedEmoji, fontSize = 50.sp)
+                        }
+                    }
+                }
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(emojis, key = { it }) { emoji ->
+                        EmojiItem(
+                            emoji = emoji,
+                            isSelected = selectedEmoji == emoji,
+                            onSelect = { selectedEmoji = emoji }
+                        )
+                    }
+                }
+            }
+
+            IosSection(title = "Ma'lumotlar") {
+                IosInputRow(label = "Guruh nomi", value = name, onValueChange = { name = it }, placeholder = "Nomi")
+                HorizontalDivider(modifier = Modifier.padding(start = 16.dp), thickness = 0.5.dp, color = IosDividerColor)
+                IosInputRow(label = "Tavsif", value = description, onValueChange = { description = it }, placeholder = "Ixtiyoriy")
+            }
+
+            IosSection(title = "Mablag' va jadval") {
+                IosRow(title = "Ixtiyoriy miqdor") {
+                    Switch(
+                        checked = isOptionalAmount,
+                        onCheckedChange = { isOptionalAmount = it },
+                        modifier = Modifier.scale(0.8f),
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF34C759))
+                    )
+                }
+                HorizontalDivider(modifier = Modifier.padding(start = 16.dp), thickness = 0.5.dp, color = IosDividerColor)
+                IosInputRow(
+                    label = "Miqdor",
+                    value = amount, 
+                    onValueChange = { amount = it }, 
+                    placeholder = "500 000", 
+                    keyboardType = KeyboardType.Number,
+                    enabled = !isOptionalAmount
+                )
+                HorizontalDivider(modifier = Modifier.padding(start = 16.dp), thickness = 0.5.dp, color = IosDividerColor)
+                IosInputRow(
+                    label = "Sana",
+                    value = meetingDays, 
+                    onValueChange = { meetingDays = it }, 
+                    placeholder = "10, 25", 
+                    subtitle = "Oyni qaysi kunlari (masalan: 1, 15)"
+                )
+            }
+
+            IosSection(title = "Tanlash usuli") {
+                Box(modifier = Modifier.padding(12.dp)) {
+                    IosSegmentedControl(
+                        options = listOf("random" to "Tasodifiy", "manual" to "Qo'lda"),
+                        selectedId = selectionMethod,
+                        onSelected = { selectionMethod = it }
+                    )
+                }
             }
         }
-        
-        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
 @Composable
-fun EmojiItem(emoji: String, isSelected: Boolean, onClick: () -> Unit) {
-    val themeRust = Color(0xFFB24F2C)
+private fun EmojiItem(emoji: String, isSelected: Boolean, onSelect: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(44.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) themeRust.copy(alpha = 0.1f) else Color.White)
-            .border(
-                width = if (isSelected) 2.dp else 0.dp,
-                color = if (isSelected) themeRust else Color.Transparent,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .clickable { onClick() },
+            .size(46.dp)
+            .clip(CircleShape)
+            .background(if (isSelected) ThemeRust.copy(alpha = 0.15f) else Color.Transparent)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { onSelect() },
         contentAlignment = Alignment.Center
     ) {
-        Text(emoji, fontSize = 20.sp)
+        Text(emoji, fontSize = 26.sp, modifier = Modifier.alpha(if (isSelected) 1f else 0.8f))
     }
 }
 
 @Composable
-fun PremiumTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
-) {
+private fun IosSegmentedControl(options: List<Pair<String, String>>, selectedId: String, onSelected: (String) -> Unit) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = Color.White
+        modifier = Modifier.fillMaxWidth().height(32.dp).padding(horizontal = 2.dp),
+        color = Color(0x1F767680),
+        shape = RoundedCornerShape(8.dp)
     ) {
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = { Text(placeholder, color = Color(0xFF757575).copy(alpha = 0.5f)) },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                cursorColor = Color(0xFFB24F2C)
-            ),
-            singleLine = true,
-            keyboardOptions = keyboardOptions
-        )
+        Row(modifier = Modifier.fillMaxSize().padding(2.dp)) {
+            options.forEach { (id, label) ->
+                val isSelected = selectedId == id
+                Surface(
+                    modifier = Modifier.weight(1f).fillMaxHeight().clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { onSelected(id) }
+                    ),
+                    color = if (isSelected) Color.White else Color.Transparent,
+                    shape = RoundedCornerShape(7.dp),
+                    shadowElevation = if (isSelected) 2.dp else 0.dp
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(label, fontSize = 13.sp, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal, color = Color.Black)
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun JoinView(onBack: () -> Unit) {
-    val themeRust = Color(0xFFB24F2C)
-    var code by remember { mutableStateOf("") }
-    
-    Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-            }
-            Text(
-                "Guruhga Qo'shilish",
-                fontSize = 28.sp,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF424242),
-                modifier = Modifier.padding(start = 8.dp)
+private fun IosInputRow(label: String, value: String, onValueChange: (String) -> Unit, placeholder: String, subtitle: String? = null, keyboardType: KeyboardType = KeyboardType.Text, enabled: Boolean = true) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 44.dp).padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(label, fontSize = 17.sp, color = Color.Black, modifier = Modifier.width(110.dp))
+            TextField(
+                value = value,
+                onValueChange = onValueChange,
+                placeholder = { Text(placeholder, color = IosLabelGray.copy(alpha = 0.5f), fontSize = 17.sp) },
+                modifier = Modifier.weight(1f),
+                enabled = enabled,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    cursorColor = ThemeRust
+                ),
+                singleLine = true,
+                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End, fontSize = 17.sp, color = if (enabled) Color.Black else IosLabelGray),
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
             )
         }
-        
-        Spacer(modifier = Modifier.height(48.dp))
-        
-        Text(
-            "Guruh ID-sini kiriting:",
-            fontSize = 17.sp,
-            color = Color(0xFF424242),
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-        
-        PremiumTextField(value = code, onValueChange = { code = it }, placeholder = "M: #GAP123")
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        Button(
-            onClick = { /* TODO: Join Logic */ },
-            modifier = Modifier.fillMaxWidth().height(60.dp),
-            shape = RoundedCornerShape(30.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = themeRust)
-        ) {
-            Text("Qo'shilish", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        if (subtitle != null) {
+            Text(subtitle, modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp), fontSize = 13.sp, color = IosLabelGray)
         }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text(
-            "Yoki QR-kodni skanerlang",
-            fontSize = 14.sp,
-            color = Color(0xFF757575),
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
+    }
+}
+
+@Composable
+private fun JoinView(onBack: () -> Unit) {
+    var code by remember { mutableStateOf("") }
+    
+    Column(modifier = Modifier.fillMaxSize()) {
+        IosTopBar(title = "Qo'shilish", leftAction = "Bekor qilish", onLeftClick = onBack)
+
+        Column(modifier = Modifier.fillMaxSize().padding(top = 20.dp)) {
+            IosSection(title = "Taklif kodi") {
+                IosInputRow(label = "ID-kod", value = code, onValueChange = { code = it }, placeholder = "#GAP123")
+            }
+            
+            IosSection {
+                IosRow(icon = Icons.Default.QrCodeScanner, iconColor = ThemeRust, title = "QR-kodni skanerlash", showChevron = true, onClick = { /* QR */ })
+            }
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            Button(
+                onClick = { /* Join */ },
+                modifier = Modifier.fillMaxWidth().padding(16.dp).height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = ThemeRust),
+                enabled = code.isNotBlank()
+            ) {
+                Text("Qo'shilish", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+fun Modifier.scale(scale: Float): Modifier = this.layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    layout(placeable.width, placeable.height) {
+        placeable.placeRelativeWithLayer(0, 0) {
+            scaleX = scale
+            scaleY = scale
+        }
     }
 }
