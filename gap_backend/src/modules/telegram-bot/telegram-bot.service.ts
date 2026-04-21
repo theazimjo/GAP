@@ -67,7 +67,7 @@ export class TelegramBotService implements OnModuleInit {
     // Handle Contact Sharing
     this.bot.on('contact', async (ctx) => {
       const { phone_number, user_id } = ctx.message.contact;
-      const telegramId = user_id.toString();
+      const telegramId = (user_id || ctx.from.id).toString();
 
       try {
         this.logger.log(`User ${telegramId} shared contact: ${phone_number}`);
