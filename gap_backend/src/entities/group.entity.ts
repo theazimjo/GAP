@@ -20,6 +20,21 @@ export class Group {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column({ default: '🤝' })
+  emoji: string;
+
+  @Column({ nullable: true })
+  description: string;
+
+  @Column({ default: false })
+  isAmountOptional: boolean;
+
+  @Column({ nullable: true })
+  meetingDays: string; // Comma separated days
+
+  @Column({ default: 'random' })
+  selectionMethod: string;
+
   @Column()
   creatorId: number;
 

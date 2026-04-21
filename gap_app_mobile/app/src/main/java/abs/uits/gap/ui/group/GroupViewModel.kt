@@ -47,13 +47,30 @@ class GroupViewModel(private val repository: GroupRepository) : ViewModel() {
         }
     }
 
-    fun createGroup(name: String) {
+    fun createGroup(
+        name: String,
+        emoji: String? = null,
+        description: String? = null,
+        isAmountOptional: Boolean = false,
+        meetingDays: String? = null,
+        selectionMethod: String = "random",
+        totalPool: Double = 0.0,
+        contributionAmount: Double = 0.0
+    ) {
         _createState.value = CreateGroupState.Loading
         viewModelScope.launch {
-            val result = repository.createGroup(name)
+            val result = repository.createGroup(
+                name = name,
+                emoji = emoji,
+                description = description,
+                isAmountOptional = isAmountOptional,
+                meetingDays = meetingDays,
+                selectionMethod = selectionMethod,
+                totalPool = totalPool,
+                contributionAmount = contributionAmount
+            )
             if (result.isSuccess) {
                 _createState.value = CreateGroupState.Success
-                // Refresh list
                 fetchGroups()
             } else {
                 _createState.value = CreateGroupState.Error(result.exceptionOrNull()?.message ?: "Yaratishda xatolik")

@@ -78,7 +78,12 @@ data class GroupDto(
     val totalPool: Double,
     val contributionAmount: Double,
     val creator: UserDto,
-    val _count: GroupCountDto
+    val _count: GroupCountDto,
+    val emoji: String? = null,
+    val description: String? = null,
+    val isAmountOptional: Boolean = false,
+    val meetingDays: String? = null,
+    val selectionMethod: String = "random"
 )
 
 data class GroupCountDto(
@@ -86,7 +91,14 @@ data class GroupCountDto(
 )
 
 data class CreateGroupRequest(
-    val name: String
+    val name: String,
+    val emoji: String? = null,
+    val description: String? = null,
+    val isAmountOptional: Boolean = false,
+    val meetingDays: String? = null,
+    val selectionMethod: String = "random",
+    val totalPool: Double = 0.0,
+    val contributionAmount: Double = 0.0
 )
 
 data class AddMemberRequest(

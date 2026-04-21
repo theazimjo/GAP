@@ -6,14 +6,21 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
-
+  
   @Post()
   async create(@Body() body: any, @Req() req: any) {
     return this.groupsService.createGroup(
-      body.name,
-      body.totalPool,
-      body.contributionAmount,
+      body.name, 
+      body.totalPool || 0, 
+      body.contributionAmount || 0, 
       req.user.userId,
+      {
+        emoji: body.emoji,
+        description: body.description,
+        isAmountOptional: body.isAmountOptional,
+        meetingDays: body.meetingDays,
+        selectionMethod: body.selectionMethod
+      }
     );
   }
 

@@ -15,12 +15,25 @@ export class GroupsService {
     private usersService: UsersService,
   ) {}
 
-  async createGroup(name: string, totalPool: number, contributionAmount: number, creatorId: number) {
+  async createGroup(
+    name: string, 
+    totalPool: number, 
+    contributionAmount: number, 
+    creatorId: number,
+    metadata?: {
+      emoji?: string;
+      description?: string;
+      isAmountOptional?: boolean;
+      meetingDays?: string;
+      selectionMethod?: string;
+    }
+  ) {
     const group = this.groupsRepository.create({
       name,
       totalPool,
       contributionAmount,
       creatorId,
+      ...metadata
     });
     const savedGroup = await this.groupsRepository.save(group);
 

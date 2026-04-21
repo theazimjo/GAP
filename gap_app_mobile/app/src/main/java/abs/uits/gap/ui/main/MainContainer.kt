@@ -13,6 +13,7 @@ import abs.uits.gap.ui.auth.AuthViewModel
 import abs.uits.gap.ui.group.GroupListScreen
 import abs.uits.gap.ui.group.GroupViewModel
 import abs.uits.gap.ui.profile.ProfileScreen
+import abs.uits.gap.ui.create.CreateScreen
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
@@ -32,8 +33,8 @@ fun MainContainer(
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf(
         BottomNavItem.Home,
-        BottomNavItem.Contacts,
         BottomNavItem.Groups,
+        BottomNavItem.Create,
         BottomNavItem.Profile
     )
     
@@ -87,15 +88,14 @@ fun MainContainer(
                     description = "Bugungi kuningiz qanday o'tmoqda?",
                     icon = BottomNavItem.Home.icon
                 )
-                1 -> PlaceholderScreen(
-                    title = "Kontaktlar",
-                    description = "Do'stlaringiz bilan muloqotni boshlang",
-                    icon = BottomNavItem.Contacts.icon
-                )
-                2 -> GroupListScreen(
+                1 -> GroupListScreen(
                     authViewModel = authViewModel,
                     groupViewModel = groupViewModel,
                     onNavigateToDetail = onNavigateToDetail
+                )
+                2 -> CreateScreen(
+                    viewModel = groupViewModel,
+                    onNavigateBack = { selectedItem = 1 } // Go back to Groups after creation
                 )
                 3 -> ProfileScreen(
                     viewModel = profileViewModel,

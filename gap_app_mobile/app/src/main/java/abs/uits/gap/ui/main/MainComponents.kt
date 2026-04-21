@@ -3,8 +3,8 @@ package abs.uits.gap.ui.main
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -22,9 +22,9 @@ sealed class BottomNavItem(
     val title: String,
     val icon: ImageVector
 ) {
-    object Home : BottomNavItem("home", "Asosiy", Icons.Default.Home)
-    object Contacts : BottomNavItem("contacts", "Kontaktlar", Icons.Default.Contacts)
+    object Home : BottomNavItem("home", "Bosh sahifa", Icons.Default.Home)
     object Groups : BottomNavItem("groups", "Gaplar", Icons.Default.Chat)
+    object Create : BottomNavItem("create", "Yaratish", Icons.Default.Add)
     object Profile : BottomNavItem("profile", "Profil", Icons.Default.Person)
 }
 

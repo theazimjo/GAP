@@ -37,10 +37,28 @@ class GroupRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun createGroup(name: String): Result<Unit> {
+    suspend fun createGroup(
+        name: String,
+        emoji: String? = null,
+        description: String? = null,
+        isAmountOptional: Boolean = false,
+        meetingDays: String? = null,
+        selectionMethod: String = "random",
+        totalPool: Double = 0.0,
+        contributionAmount: Double = 0.0
+    ): Result<Unit> {
         return try {
             val response = apiService.createGroup(
-                CreateGroupRequest(name)
+                CreateGroupRequest(
+                    name = name,
+                    emoji = emoji,
+                    description = description,
+                    isAmountOptional = isAmountOptional,
+                    meetingDays = meetingDays,
+                    selectionMethod = selectionMethod,
+                    totalPool = totalPool,
+                    contributionAmount = contributionAmount
+                )
             )
             if (response.isSuccessful) {
                 Result.success(Unit)
